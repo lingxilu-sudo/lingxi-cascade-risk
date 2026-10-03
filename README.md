@@ -4,6 +4,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![DOI](https://zenodo.org/badge/10.5281/zenodo.23095041.svg)](https://doi.org/10.5281/zenodo.23095041)
 
 ---
 
@@ -21,8 +22,8 @@ The **Cascade Risk Framework** is the first model to couple **orbital mechanics-
 |--------|-------|
 | Debris growth (50 years) | 36,500 → 1.5M objects (41×) |
 | Historical premium | $125M/year |
-| Cascade-adjusted premium | $580M/year |
-| **Cascade factor** | **4.6×** |
+| Cascade-adjusted premium | $620M/year |
+| **Cascade factor** | **5.0×** |
 | VaR₉₅ | $405M/year |
 | CVaR₅ | $446M/year |
 
@@ -121,9 +122,12 @@ See `paper/framework_paper.md` for the full academic paper.
 
 ```bibtex
 @misc{lu2026cascade,
-  title={A Physics-Based Monte Carlo Framework for Space Debris Cascade Risk and Insurance Pricing},
+  title={The Cascade Risk Framework: A Physics-Based Monte Carlo Model for Space Debris Insurance Pricing},
   author={Lu, Lingxi},
   year={2026},
+  publisher={Zenodo},
+  doi={10.5281/zenodo.23095041},
+  url={https://doi.org/10.5281/zenodo.23095041},
   note={Version 2.0}
 }
 ```
