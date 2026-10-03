@@ -1,0 +1,48 @@
+# ============================================================================
+# Calibration Configuration: Historical Collision Events
+# ============================================================================
+
+calibration:
+  # Iridium 33 × Cosmos 2251 (February 10, 2009)
+  # Altitude: ~790 km, Inclination: 86.4° × 74.0°
+  # Relative velocity: ~11.6 km/s
+  # Generated ~2,300 trackable fragments (>10cm)
+  iridium_cosmos:
+    date: "2009-02-10"
+    altitude_km: 790
+    relative_velocity_km_s: 11.6
+    trackable_fragments: 2300
+    total_fragments_estimated: 100000
+    satellite_mass_1_kg: 560       # Iridium 33
+    satellite_mass_2_kg: 950       # Cosmos 2251
+
+  # Fengyun-1C ASAT Test (January 11, 2007)
+  # Altitude: ~865 km
+  # Generated ~3,500 trackable fragments (>10cm)
+  fengyun_1c:
+    date: "2007-01-11"
+    altitude_km: 865
+    relative_velocity_km_s: 8.0    # Head-on intercept
+    trackable_fragments: 3500
+    total_fragments_estimated: 150000
+    satellite_mass_kg: 750
+
+  # Kosmos 1408 ASAT Test (November 15, 2021)
+  kosmos_1408:
+    date: "2021-11-15"
+    altitude_km: 480
+    relative_velocity_km_s: 7.0
+    trackable_fragments: 1500
+    total_fragments_estimated: 50000
+    satellite_mass_kg: 2200
+
+  # Calibration targets
+  target_metrics:
+    # Fragments > 10cm per kg of target mass
+    fragments_per_kg_large:
+      mean: 3.0
+      std: 1.5
+    # Total fragments (all sizes) per kg
+    fragments_per_kg_total:
+      mean: 150.0
+      std: 80.0

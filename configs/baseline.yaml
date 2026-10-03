@@ -1,0 +1,57 @@
+# ============================================================================
+# Baseline Configuration: Space Debris Cascade Risk Framework
+# ============================================================================
+# All parameters can be overridden per-experiment.
+# Units are specified inline.
+
+physics:
+  # Orbital geometry
+  altitude_km: 800.0
+  shell_thickness_km: 200.0
+  inclination_deg: 51.6
+
+  # Population (2025 estimates, ESA Space Environment Report)
+  n_debris_large: 36500          # >10 cm, trackable
+  n_debris_medium: 1000000       # 1-10 cm, lethal but untrackable
+  n_debris_small: 130000000      # <1 cm, non-lethal but erosive
+  n_satellites: 8000             # Active satellites in LEO
+
+  # Collision physics
+  cross_section_large_m2: 10.0   # Typical satellite cross-section
+  cross_section_medium_m2: 0.01  # 1-10cm fragment cross-section
+  relative_velocity_km_s: 10.0   # Mean relative velocity in LEO
+
+  # NASA Standard Breakup Model parameters
+  # k_debris ~ LogNormal(mu, sigma) fragments per collision
+  k_debris_mu: 5.5               # ln-scale mean (~245 fragments)
+  k_debris_sigma: 0.8            # ln-scale std dev
+
+  # Orbital decay
+  decay_rate_per_year: 0.005
+  decay_rate_uncertainty: 0.1    # ±10% stochastic noise
+
+  # Simulation parameters
+  t_max_years: 50.0
+  dt_years: 0.1                  # ~36.5 days per step
+  n_monte_carlo_paths: 1000
+  random_seed: 42
+
+economics:
+  # Satellite valuation
+  v_satellite_usd: 50000000      # $50M average
+  v_satellite_uncertainty: 0.3   # ±30%
+
+  # Historical baseline
+  historical_failure_rate: 0.005   # 0.5% in-orbit failure rate (excl. launch)
+
+  # Insurance pricing components (Solvency II framework)
+  expense_loading: 0.15          # 15% expense/profit loading
+  risk_loading_multiplier: 1.5   # CVaR-based risk loading
+  discount_rate: 0.04            # 4% annual discount rate
+
+  # Portfolio parameters
+  n_policies: 500                # Number of insured satellites
+  correlation_coefficient: 0.3   # Inter-policy correlation
+
+  # Risk metrics
+  evt_threshold_percentile: 90.0

@@ -1,0 +1,62 @@
+# ============================================================================
+# Sensitivity Analysis Configuration
+# ============================================================================
+# One-at-a-time (OAT) and Sobol global sensitivity ranges.
+
+sensitivity:
+  # Parameters to vary and their ranges
+  parameters:
+    k_debris_mu:
+      label: "Debris Yield (ln-mean)"
+      low: 4.5
+      high: 6.5
+      base: 5.5
+      unit: "ln-fragments"
+
+    decay_rate_per_year:
+      label: "Orbital Decay Rate"
+      low: 0.002
+      high: 0.010
+      base: 0.005
+      unit: "1/year"
+
+    relative_velocity_km_s:
+      label: "Relative Velocity"
+      low: 7.0
+      high: 14.0
+      base: 10.0
+      unit: "km/s"
+
+    n_satellites:
+      label: "Active Satellites"
+      low: 4000
+      high: 12000
+      base: 8000
+      unit: "count"
+
+    cross_section_large_m2:
+      label: "Satellite Cross-Section"
+      low: 5.0
+      high: 20.0
+      base: 10.0
+      unit: "m²"
+
+    v_satellite_usd:
+      label: "Satellite Value"
+      low: 20000000
+      high: 100000000
+      base: 50000000
+      unit: "USD"
+
+    correlation_coefficient:
+      label: "Portfolio Correlation"
+      low: 0.0
+      high: 0.8
+      base: 0.3
+      unit: "coefficient"
+
+  # Sobol sensitivity analysis settings
+  sobol:
+    n_samples: 1024              # Must be power of 2
+    n_monte_carlo_paths: 200     # Reduced for speed
+    saltelli_sampling: true
