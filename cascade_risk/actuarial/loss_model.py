@@ -153,12 +153,10 @@ class LossModel:
         # Per-satellite annual loss
         per_sat_loss = hit_prob * self.v_satellite_usd
 
-        # Portfolio loss with correlation
-        # Using Gaussian Copula approximation:
-        # portfolio_loss = n_policies × per_sat_loss × (1 + (n-1)×ρ) / n
-        # Simplified: expected portfolio loss with correlation adjustment
-        correlation_factor = 1.0 + (self.n_policies - 1) * self.correlation_coefficient
-        portfolio_annual_losses = per_sat_loss * self.n_policies * correlation_factor / self.n_policies
+        # Portfolio loss (expected value)
+        # Note: Correlation affects variance/risk metrics, not expected value.
+        # Correlation is handled in portfolio_risk.py via Gaussian Copula.
+        portfolio_annual_losses = per_sat_loss * self.n_policies
 
         # Maximum annual loss per path
         max_annual_losses = np.max(portfolio_annual_losses, axis=1)
@@ -182,9 +180,9 @@ class LossModel:
             v_satellite_usd=self.v_satellite_usd,
         )
 
-    def historical_loss(self, failure_rate: float = 0.02) -> float:
+    def historical_loss(self, failure_rate: float = 0.005) -> float:
         """
-        Historical expected annual loss based on launch failure rate only.
-        No cascade risk included.
+        Historical expected annual loss based on in-orbit failure rate only.
+        No cascade risk included. Uses 0.5% in-orbit rate (not launch failure).
         """
         return failure_rate * self.v_satellite_usd * self.n_policies

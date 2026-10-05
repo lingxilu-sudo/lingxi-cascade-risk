@@ -44,7 +44,6 @@ from cascade_risk.actuarial import (
     PremiumCalculator,
     PortfolioRiskModel,
 )
-from cascade_risk.calibration import CalibrationEngine
 from cascade_risk.analysis import SensitivityAnalyzer
 
 
@@ -119,11 +118,9 @@ def run_pipeline(config: Config, output_dir: Path, n_paths_override: int = None)
 
     n_paths = n_paths_override or p.n_monte_carlo_paths
 
-    # --- Calibration ---
-    print("[1/6] Calibrating model parameters...")
-    cal_engine = CalibrationEngine()
-    k_params = cal_engine.calibrate_k_debris()
-    print(f"  Calibrated k_debris: mu={k_params['mu']:.2f}, sigma={k_params['sigma']:.2f}")
+    # --- Model Parameters ---
+    print("[1/6] Loading model parameters...")
+    print(f"  k_debris: mu={config.physics.k_debris_mu:.2f}, sigma={config.physics.k_debris_sigma:.2f} (NASA Standard Breakup Model)")
     print(f"  Shell: {models['shell']}")
     print(f"  K (carrying capacity): {models['shell'].carrying_capacity(p.cross_section_large_m2, p.relative_velocity_km_s):.0f}")
 

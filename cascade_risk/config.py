@@ -60,7 +60,7 @@ class PhysicsConfig:
 class EconomicsConfig:
     v_satellite_usd: float = 50_000_000
     v_satellite_uncertainty: float = 0.3
-    historical_failure_rate: float = 0.02
+    historical_failure_rate: float = 0.005  # 0.5% in-orbit (not launch failure rate)
     expense_loading: float = 0.15
     risk_loading_multiplier: float = 1.5
     discount_rate: float = 0.04

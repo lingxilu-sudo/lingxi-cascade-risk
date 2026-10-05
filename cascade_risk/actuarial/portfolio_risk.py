@@ -156,9 +156,11 @@ class PortfolioRiskModel:
         port_var_99 = float(np.percentile(max_losses, 99))
         port_cvar_95 = float(np.mean(max_losses[max_losses >= port_var_95])) if len(max_losses[max_losses >= port_var_95]) > 0 else port_var_95
 
-        # Sum of individual VaRs (no correlation)
+        # Sum of individual VaRs (no correlation, time-integrated)
+        # Use mean hit probability across all time steps for each satellite
+        avg_hit_prob = float(np.mean(mean_hit_prob))
         individual_var_95 = float(np.percentile(
-            stats.bernoulli.rvs(mean_hit_prob.max(), size=n_simulations) * self.v_satellite_usd,
+            stats.bernoulli.rvs(avg_hit_prob, size=n_simulations) * self.v_satellite_usd,
             95
         ))
         sum_individual_var_95 = individual_var_95 * n
