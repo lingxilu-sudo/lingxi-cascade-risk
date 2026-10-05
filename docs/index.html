@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cascade Risk Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --accent: #1b2a4a;
+    --text: #1e2532;
+    --text-secondary: #5a6474;
+    --bg: #ffffff;
+    --border: #e0e0e0;
+    --max-width: 640px;
+    --spacing: 2rem;
+    --font-sans: 'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  }
+  [data-theme="dark"] {
+    --accent: #6b8cce;
+    --text: #e8eaed;
+    --text-secondary: #9aa0a6;
+    --bg: #1a1a1a;
+    --border: #333333;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-sans); background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+  /* NAV */
+  .nav-bar { max-width: var(--max-width); margin: 0 auto; padding: 1rem var(--spacing); display: flex; gap: 2rem; justify-content: space-between; align-items: center; }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  .theme-btn { background: none; border: none; cursor: pointer; color: var(--accent); padding: 0.25rem 0; font-size: 0.85rem; font-weight: 500; font-family: var(--font-sans); display: flex; align-items: center; gap: 0.4rem; }
+  .theme-btn svg { flex-shrink: 0; }
+
+  /* HERO */
+  .hero { max-width: var(--max-width); margin: 4rem auto 2rem; padding: 0 var(--spacing); }
+  .hero h1 { font-size: 1.5rem; line-height: 1.4; color: var(--text); margin-bottom: 1.5rem; font-weight: 600; }
+  .btn-primary { background: var(--accent); color: white; border: none; padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; font-family: var(--font-sans); }
+
+  /* SUMMARY CARD */
+  .summary-card { max-width: var(--max-width); margin: 3rem auto; padding: var(--spacing); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+  .summary-col { border-left: 2px solid var(--accent); padding-left: 1rem; }
+  .summary-col h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 0.5rem; font-weight: 700; }
+  .summary-col p { font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); }
+
+  /* CONTENT */
+  .content { max-width: var(--max-width); margin: 0 auto; padding: 0 var(--spacing); }
+  .section { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); }
+  .section:last-child { border-bottom: none; }
+  .section-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.5rem; }
+  .section-num { font-family: var(--font-serif); font-size: 2.5rem; font-weight: 700; color: var(--border); line-height: 1; flex-shrink: 0; }
+  .section-header h2 { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .section-header h2 em { font-style: italic; color: var(--accent); }
+  .content p { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1.2rem; line-height: 1.8; }
+  .content p strong { color: var(--text); }
+
+  /* INFO BOX */
+  .info-box { border-left: 4px solid var(--accent); padding: 1rem 1.2rem; margin: 1.5rem 0; background: var(--bg); border-radius: 0 4px 4px 0; }
+  .info-box .ib-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
+  .info-box p { color: var(--text); font-size: 0.9rem; margin: 0; }
+  .info-box.gold { border-left-color: #c8a84e; }
+  .info-box.gold .ib-label { color: #c8a84e; }
+  .info-box.red { border-left-color: #c0392b; }
+  .info-box.red .ib-label { color: #c0392b; }
+
+  /* CARD */
+  .card { border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin: 1.5rem 0; }
+  .card h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.8rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border); }
+  .card p { font-size: 0.9rem; margin-bottom: 0.8rem; }
+
+  /* FORMULA */
+  .formula-box { text-align: center; padding: 1.2rem; margin: 1.5rem 0; font-family: var(--font-serif); font-size: 1.2rem; color: var(--text); font-style: italic; border: 1px solid var(--border); border-radius: 6px; }
+
+  /* TABLE */
+  .data-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+  .data-table thead th { background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.7rem 1rem; text-align: left; }
+  .data-table thead th:first-child { border-radius: 4px 0 0 0; }
+  .data-table thead th:last-child { border-radius: 0 4px 0 0; }
+  .data-table tbody td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+  .data-table .num { font-variant-numeric: tabular-nums; text-align: right; }
+
+  /* COMPARE */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; position: relative; overflow: hidden; }
+  .compare-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .compare-card.old::before { background: #c0392b; }
+  .compare-card.new::before { background: var(--accent); }
+  .compare-card .cc-tag { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .compare-card.old .cc-tag { color: #c0392b; }
+  .compare-card.new .cc-tag { color: var(--accent); }
+  .compare-card .cc-val { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
+  .compare-card.old .cc-val { color: #c0392b; }
+  .compare-card.new .cc-val { color: var(--accent); }
+  .compare-card .cc-desc { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; text-align: center; }
+  .stat-box .sv { font-size: 1.6rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+  .stat-box .sl { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.2rem; line-height: 1.4; }
+
+  /* FLOW */
+  .flow { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0; padding: 1.5rem; border: 1px solid var(--border); border-radius: 6px; }
+  .flow-node { border: 1px solid var(--border); border-radius: 6px; padding: 0.8rem 1rem; text-align: center; min-width: 100px; }
+  .flow-node .fi { font-size: 1.3rem; margin-bottom: 0.2rem; }
+  .flow-node .fl { font-size: 0.72rem; color: var(--text-secondary); font-weight: 500; }
+  .flow-arrow { color: var(--text-secondary); font-size: 1rem; }
+
+  /* TIMELINE */
+  .timeline { margin: 1.5rem 0; position: relative; padding-left: 2rem; }
+  .timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .tl-event { position: relative; margin-bottom: 1.5rem; }
+  .tl-event::before { content: ''; position: absolute; left: -2rem; top: 6px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent); background: var(--bg); }
+  .tl-event.severe::before { background: #c0392b; border-color: #c0392b; }
+  .tl-year { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
+  .tl-event.severe .tl-year { color: #c0392b; }
+  .tl-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin: 0.1rem 0; }
+  .tl-detail { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+
+  /* COLLAPSIBLE DEMO */
+  .demo-collapse { max-width: var(--max-width); margin: var(--spacing) auto; padding: 0 var(--spacing); }
+  .demo-collapse summary { cursor: pointer; font-weight: 600; color: var(--accent); padding: 1rem 0; border-bottom: 1px solid var(--border); list-style: none; font-size: 0.95rem; }
+  .demo-collapse summary::-webkit-details-marker { display: none; }
+  .demo-collapse[open] summary { margin-bottom: 1rem; }
+  .demo-inner canvas { border-radius: 6px; background: #0f1a30; width: 100%; max-width: 100%; }
+  .demo-controls { display: flex; gap: 0.6rem; justify-content: center; margin-top: 1rem; }
+  .btn { background: var(--accent); color: #fff; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: var(--font-sans); }
+  .btn.alt { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+  .demo-readout { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.8rem; font-size: 0.8rem; color: var(--text-secondary); }
+  .demo-readout strong { color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* FOOTER */
+  .footer { max-width: var(--max-width); margin: 4rem auto 2rem; padding: 2rem var(--spacing) 0; border-top: 1px solid var(--border); }
+  .footer p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .footer strong { color: var(--text); }
+  .footer a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .footer a:hover { text-decoration: underline; }
+  .download-link { display: inline-block; margin-top: 0.8rem; font-size: 0.9rem; font-weight: 600; color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 2px; }
+  .download-link:hover { opacity: 0.7; }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    .btn-primary { width: 100%; text-align: center; }
+    .hero h1 { font-size: 1.3rem; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .compare { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .stats-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav-bar">
+  <div class="nav-links">
+    <a href="#summary">Summary</a>
+    <a href="#method">Method</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <button class="theme-btn" id="themeToggle" aria-label="Toggle theme"><svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg><span id="themeLabel">Night</span></button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Coupling orbital mechanics with actuarial science for satellite insurance pricing</h1>
+  <a href="#summary" class="btn-primary">1-min summary &darr;</a>
+  <a href="paper.pdf" class="download-link" target="_blank">Download full paper (PDF)</a>
+</section>
+
+<!-- SUMMARY CARD -->
+<section id="summary" class="summary-card">
+  <div class="summary-grid">
+    <div class="summary-col">
+      <h3>Problem</h3>
+      <p>Space insurance prices risk using historical failure rates, ignoring cascade feedback. One collision can trigger chain reactions, creating correlated losses across entire portfolios.</p>
+    </div>
+    <div class="summary-col">
+      <h3>Method</h3>
+      <p>Physics-based Monte Carlo simulation (1,000 paths, 50 years) coupled with Solvency II premium decomposition. Calibrated against three documented collision events.</p>
+    </div>
+    <div class="summary-col">
+      <h3>Key Finding</h3>
+      <p>Cascade-adjusted premiums are 16.5&times; higher than current market rates ($2,058M vs $125M per year for 500 satellites). That $1,933M gap is an unfunded liability.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+  <!-- 01 OVERVIEW -->
+  <section id="overview" class="section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>Executive Overview</h2>
+    </div>
+    <p>
+      Space insurance is a $1.2 billion market. The way we price it hasn't changed in decades:
+      <strong>look at what broke last year, add a margin, move on.</strong>
+    </p>
+    <p>
+      There's a problem with this. It assumes tomorrow will look like yesterday. But Low Earth Orbit
+      doesn't work that way. One collision makes hundreds of fragments. Each fragment is a projectile.
+      Those projectiles hit other things, making more fragments. The whole system has a
+      <strong>feedback loop</strong> that nobody's pricing in.
+    </p>
+
+    <div class="info-box">
+      <div class="ib-label">What is Kessler Syndrome?</div>
+      <p>
+        First described by NASA scientist Donald Kessler in 1978, the syndrome predicts
+        that once debris density exceeds a critical threshold, collisions become
+        self-sustaining: each impact generates more debris than natural decay removes,
+        leading to exponential growth. In the worst case, entire orbital shells become
+        unusable &mdash; a scenario sometimes called "cascading collisional breakup."
+      </p>
+    </div>
+
+    <p>
+      This framework presents the first quantitative model that couples physics-based
+      cascade simulation with actuarial pricing. The result: insurance premiums that are
+      <strong>16.5 times higher</strong> than current market rates &mdash; a gap that
+      represents both a systemic risk to insurers and a market failure in orbital
+      sustainability.
+    </p>
+
+    <div class="info-box gold">
+      <div class="ib-label">Why This Matters</div>
+      <p>
+        If insurers underprice risk by 16.5&times;, operators have no economic incentive to
+        choose less congested orbits or invest in debris mitigation. Correct pricing
+        aligns private costs with systemic risks &mdash; making sustainability a market
+        force rather than a regulatory burden.
+      </p>
+    </div>
+  </section>
+
+  <!-- 02 PHYSICS -->
+  <section id="physics" class="section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Physical Layer: <em>Collision-Driven</em> Debris Dynamics</h2>
+    </div>
+    <p>
+      I'm looking at one shell of LEO, centered at 800 km altitude, about 200 km thick
+      (700&ndash;900 km). That's where most of the dead satellites are. That's also where
+      Starlink and everyone else wants to operate.
+    </p>
+    <p>
+      Most models cheat: they put in a free parameter for how fast cascades grow. I don't.
+      Everything here comes from <strong>actual collision physics</strong> &mdash; no tuning,
+      no fitting. The debris growth is what the equations say it should be.
+    </p>
+
+    <div class="card">
+      <h3>Collision Rate: The Kessler&ndash;Flournoy Formula</h3>
+      <p>The expected annual collision rate between debris and satellites:</p>
+      <div class="formula-box">
+        R = N<sub>d</sub> &middot; N<sub>s</sub> &middot; &sigma; &middot; v &middot; T / V
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Parameter</th><th>Description</th><th class="num">Baseline</th></tr></thead>
+        <tbody>
+          <tr><td>N<sub>d</sub></td><td>Debris population (&gt;10 cm)</td><td class="num">36,500</td></tr>
+          <tr><td>N<sub>s</sub></td><td>Active satellites in shell</td><td class="num">8,000</td></tr>
+          <tr><td>&sigma;</td><td>Satellite collision cross-section</td><td class="num">10 m&sup2;</td></tr>
+          <tr><td>v</td><td>Mean relative velocity</td><td class="num">10 km/s</td></tr>
+          <tr><td>T</td><td>Seconds per year</td><td class="num">3.16 &times; 10&#8319;</td></tr>
+          <tr><td>V</td><td>Shell volume</td><td class="num">1.29 &times; 10&#8311; km&sup3;</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:0;">
+        At current population levels, this yields <strong>~7 debris&ndash;satellite</strong> and
+        <strong>~16 debris&ndash;debris</strong> collisions per year.
+      </p>
+    </div>
+
+    <div class="info-box red">
+      <div class="ib-label">The Quadratic Feedback</div>
+      <p>
+        Debris&ndash;debris collision rate scales with N<sub>d</sub>&sup2; &mdash; doubling
+        the debris <em>quadruples</em> the collision rate. Each collision produces new
+        fragments (calibrated to the NASA Standard Breakup Model), which further
+        accelerate collisions. This is the mathematical root of the cascade: a
+        self-reinforcing loop with no natural brake.
+      </p>
+    </div>
+  </section>
+
+  <!-- COLLAPSIBLE SIMULATION DEMO -->
+  <details class="demo-collapse">
+    <summary>Open interactive demo</summary>
+    <div class="demo-inner">
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">
+        Watch debris grow over 50 simulated years. The left panel shows the orbital
+        shell with debris (red) and satellites (green). The right panel plots the
+        debris population trajectory in real time.
+      </p>
+      <canvas id="simCanvas" width="720" height="340"></canvas>
+      <div class="demo-controls">
+        <button class="btn" onclick="runSim()">&#9654; Run Simulation</button>
+        <button class="btn alt" onclick="resetSim()">&#8635; Reset</button>
+      </div>
+      <div class="demo-readout">
+        <div>Debris: <strong id="sDebris">36,500</strong></div>
+        <div>Collisions: <strong id="sCol">0</strong></div>
+        <div>Year: <strong id="sYear">0.0</strong></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 03 CALIBRATION -->
+  <section id="calibration" class="section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Calibration: <em>Grounded</em> in Reality</h2>
+    </div>
+    <p>
+      Before the model can project future risk, it must reproduce known events.
+      The fragment yield parameters are calibrated against three documented collision
+      events that collectively created over 7,000 trackable objects:
+    </p>
+
+    <div class="timeline">
+      <div class="tl-event severe">
+        <div class="tl-year">January 11, 2007</div>
+        <div class="tl-title">Fengyun-1C Anti-Satellite Test</div>
+        <div class="tl-detail">
+          China destroyed its own weather satellite with a ground-launched missile.
+          The 880 kg spacecraft at 865 km altitude generated <strong>~3,500 fragments</strong>
+          (&gt;10 cm) &mdash; the largest single debris creation event in history.
+          Many fragments remain in orbit today.
+        </div>
+      </div>
+      <div class="tl-event severe">
+        <div class="tl-year">February 10, 2009</div>
+        <div class="tl-title">Iridium 33 &times; Cosmos 2251</div>
+        <div class="tl-detail">
+          The first accidental hypervelocity collision between two intact satellites.
+          An active Iridium communications satellite (560 kg) struck a defunct Russian
+          military satellite (950 kg) at 11.7 km/s over northern Siberia, generating
+          <strong>~2,300 fragments</strong> (&gt;10 cm) and a combined 1,510 kg of debris.
+        </div>
+      </div>
+      <div class="tl-event">
+        <div class="tl-year">November 15, 2021</div>
+        <div class="tl-title">Kosmos 1408 Anti-Satellite Test</div>
+        <div class="tl-detail">
+          Russia conducted a direct-ascent ASAT test against its own defunct
+          reconnaissance satellite, creating <strong>~1,500 fragments</strong> (&gt;10 cm)
+          from 2,200 kg of mass at 485 km. The ISS crew took shelter twice as debris
+          passed within close proximity.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Calibration Results</h3>
+      <table class="data-table">
+        <thead><tr><th>Event</th><th>Date</th><th class="num">Fragments (&gt;10cm)</th><th class="num">Mass (kg)</th></tr></thead>
+        <tbody>
+          <tr><td>Fengyun-1C (ASAT)</td><td>2007-01-11</td><td class="num">~3,500</td><td class="num">880</td></tr>
+          <tr><td>Iridium 33 &times; Cosmos 2251</td><td>2009-02-10</td><td class="num">~2,300</td><td class="num">1,510</td></tr>
+          <tr><td>Kosmos 1408 (ASAT)</td><td>2021-11-15</td><td class="num">~1,500</td><td class="num">2,200</td></tr>
+        </tbody>
+      </table>
+      <p>
+        These events anchor the fragment yield distributions: debris&ndash;satellite collisions
+        produce a median of ~245 fragments (log-normal, &mu;=5.5, &sigma;=0.8), while
+        debris&ndash;debris collisions produce a median of ~3 fragments (log-normal,
+        &mu;=1.1, &sigma;=0.5). The asymmetry reflects the mass differential: a fragment
+        hitting a satellite releases far more energy than two small fragments colliding.
+      </p>
+    </div>
+  </section>
+
+  <!-- 04 ECONOMICS -->
+  <section id="economics" class="section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>Economic Layer: <em>From</em> Debris <em>to</em> Dollars</h2>
+    </div>
+    <p>
+      The physics layer outputs debris population trajectories &mdash; how many objects
+      occupy the shell at each point in time. To convert this into financial risk, we
+      need a bridge: <strong>collision physics to loss probabilities to insurance premiums.</strong>
+    </p>
+
+    <div class="card">
+      <h3>The Conversion Chain</h3>
+      <p>
+        <strong>Step 1:</strong> From debris count N(t), compute each satellite's annual
+        hit probability using the same flux equation: p<sub>hit</sub> = N<sub>d</sub> &times;
+        &sigma; &times; v &times; T / V. At current debris levels, this is ~0.09% per
+        satellite per year &mdash; small, but non-negligible across a portfolio.
+      </p>
+      <p>
+        <strong>Step 2:</strong> Multiply hit probability by satellite value ($50M average)
+        to get per-policy expected loss. Then aggregate across the 500-satellite insured
+        portfolio, applying a Gaussian Copula to model correlated losses (when debris
+        increases, all satellites become more vulnerable simultaneously).
+      </p>
+      <p>
+        <strong>Step 3:</strong> From the loss distribution across 1,000 Monte Carlo paths,
+        extract risk metrics (VaR, CVaR, EVT) and price using the Solvency II framework.
+      </p>
+    </div>
+
+    <div class="flow">
+      <div class="flow-node"><div class="fi">&#127758;</div><div class="fl">Debris N(t)</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node"><div class="fi">&#127919;</div><div class="fl">Hit Probability</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node"><div class="fi">&#128176;</div><div class="fl">Loss Distribution</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node"><div class="fi">&#128200;</div><div class="fl">VaR / CVaR / EVT</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node"><div class="fi">&#127974;</div><div class="fl">Premium</div></div>
+    </div>
+
+    <div class="card">
+      <h3>Premium Decomposition (Solvency II)</h3>
+      <p>European insurance rules say premiums need to cover four things:</p>
+      <table class="data-table">
+        <thead><tr><th>Component</th><th>Description</th><th class="num">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Expected Loss (EL)</td><td>Mean annual portfolio loss</td><td class="num">$921.4M</td></tr>
+          <tr><td>Risk Loading</td><td>1.5&times; (CVaR&#8329;&#8325; &minus; EL) tail surcharge</td><td class="num">$966.0M</td></tr>
+          <tr><td>Capital Charge</td><td>4% cost of VaR&#8329;&#8329; regulatory capital</td><td class="num">$32.0M</td></tr>
+          <tr><td>Expense Loading</td><td>15% admin costs + profit margin</td><td class="num">$138.2M</td></tr>
+          <tr style="font-weight:700;"><td style="color:var(--accent);">Total Premium</td><td></td><td class="num" style="color:var(--accent); font-size:1.05rem;">$2,058M / yr</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The risk loading ($966M) is the biggest piece &mdash; bigger than the expected
+        loss itself. That's because the tail is brutal: in the worst 5% of scenarios,
+        you're looking at average losses of $1,565M, almost twice the mean.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Risk Metrics</h3>
+      <table class="data-table">
+        <thead><tr><th>Metric</th><th>Definition</th><th class="num">Value</th></tr></thead>
+        <tbody>
+          <tr><td>VaR&#8329;&#8325;</td><td>95th percentile of worst-year loss</td><td class="num">$1,365M</td></tr>
+          <tr><td>CVaR&#8329;&#8325; (ES)</td><td>Expected shortfall beyond VaR&#8329;&#8325;</td><td class="num">$1,565M</td></tr>
+          <tr><td>VaR&#8329;&#8329;</td><td>99th percentile of worst-year loss</td><td class="num">$1,721M</td></tr>
+          <tr><td>CVaR&#8329;&#8329; (ES)</td><td>Expected shortfall beyond VaR&#8329;&#8329;</td><td class="num">$1,854M</td></tr>
+          <tr><td>EVT VaR&#8329;&#8325;</td><td>Generalized Pareto tail estimate</td><td class="num">$1,803M</td></tr>
+          <tr><td>EVT shape (&xi;)</td><td>Heavy-tail indicator (&xi;&lt;0 &rarr; bounded)</td><td class="num">&minus;0.032</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The EVT shape parameter &xi; = &minus;0.032 indicates a slightly bounded tail
+        (Type III), but the EVT VaR&#8329;&#8325; of $1,803M &mdash; well above the empirical
+        VaR&#8329;&#8325; of $1,365M &mdash; confirms that tail events are substantially more
+        severe than the Monte Carlo sample alone would suggest.
+      </p>
+    </div>
+  </section>
+
+  <!-- 05 FINDINGS -->
+  <section id="findings" class="section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>Key Findings</h2>
+    </div>
+
+    <div class="compare">
+      <div class="compare-card old">
+        <div class="cc-tag">Traditional Pricing</div>
+        <div class="cc-val">$125M</div>
+        <div class="cc-desc">Based on 0.5% historical in-orbit failure rate. No cascade risk modeled. This is what insurers charge today.</div>
+      </div>
+      <div class="compare-card new">
+        <div class="cc-tag">Cascade-Adjusted</div>
+        <div class="cc-val">$2,058M</div>
+        <div class="cc-desc">Physics-driven model with collision feedback, EVT tail risk, and Solvency II capital structure.</div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="sv">16.5&times;</div>
+        <div class="sl">Premium<br>multiplier</div>
+      </div>
+      <div class="stat-box">
+        <div class="sv">41&times;</div>
+        <div class="sl">Debris growth<br>36.5K &rarr; 1.51M</div>
+      </div>
+      <div class="stat-box">
+        <div class="sv">$4.12M</div>
+        <div class="sl">Per-policy<br>annual premium</div>
+      </div>
+      <div class="stat-box">
+        <div class="sv">$1,933M</div>
+        <div class="sl">Gap between<br>price and risk</div>
+      </div>
+    </div>
+
+    <div class="info-box red">
+      <div class="ib-label">Systemic Risk Warning</div>
+      <p>
+        That $1,933M gap between what insurers charge ($125M) and what they should charge
+        ($2,058M) isn't just a number. It's an unfunded liability waiting to happen.
+        If a big cascade event hits while the market is priced at historical rates,
+        the claims could blow past insurer reserves and trigger
+        <strong>systemic insolvency</strong> across the whole space insurance sector.
+      </p>
+    </div>
+
+    <div class="info-box gold">
+      <div class="ib-label">Market Design Implication</div>
+      <p>
+        But here's the flip side: if we price cascade risk correctly, we get
+        <strong>economic incentives for sustainability</strong> for free. Operators who put
+        satellites in less crowded shells or invest in end-of-life deorbiting would
+        get lower premiums &mdash; making debris mitigation profitable without
+        needing regulators to force it.
+      </p>
+    </div>
+  </section>
+
+  <!-- 06 METHODOLOGY -->
+  <section id="methodology" class="section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>Methodology &amp; Limitations</h2>
+    </div>
+
+    <div class="card">
+      <h3>Simulation Architecture</h3>
+      <p><strong>Step 1 &mdash; Collision-driven growth.</strong> Debris evolution is governed by
+      Poisson-distributed collision events at each time step (&Delta;t = 0.1 yr). Fragment
+      yields follow log-normal distributions calibrated to observed events. No free cascade
+      parameters.</p>
+      <p><strong>Step 2 &mdash; Monte Carlo ensemble.</strong> 1,000 independent 50-year paths
+      produce a full probability distribution of debris trajectories and corresponding losses.</p>
+      <p><strong>Step 3 &mdash; Risk quantification.</strong> VaR, CVaR, and EVT (Generalized
+      Pareto Distribution) metrics are extracted from the max-annual-loss distribution.</p>
+      <p><strong>Step 4 &mdash; Premium calculation.</strong> Solvency II decomposition with
+      Gaussian Copula correlation-adjusted portfolio losses.</p>
+    </div>
+
+    <div class="card">
+      <h3>Limitations</h3>
+      <p>
+        <strong>Single-shell approximation.</strong> The model represents only the 800 km
+        shell. In reality, debris migrates across altitudes due to atmospheric drag and
+        collision-induced velocity changes. A multi-shell model would capture cross-altitude
+        contamination effects.
+      </p>
+      <p>
+        <strong>Static populations.</strong> Both the satellite count (8,000) and debris
+        injection rate are held constant. Dynamic modeling of mega-constellation deployment
+        schedules and retirement would improve realism.
+      </p>
+      <p>
+        <strong>No active debris removal.</strong> The model does not include ADR missions,
+        which could shift the debris trajectory below the cascade threshold.
+      </p>
+      <p>
+        <strong>Simplified fragment physics.</strong> The NASA Standard Breakup Model provides
+        fragment counts but not directional distributions or size&ndash;velocity correlations
+        that would affect collision probabilities.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Planned Extensions</h3>
+      <p>
+        Multi-shell model with cross-altitude migration; NORAD TLE data integration for
+        empirical debris tracking; dynamic constellation deployment modeling; reinsurance
+        layer pricing (excess-of-loss, stop-loss structures); and sensitivity analysis
+        using Sobol indices to identify the most impactful parameters.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer id="contact" class="footer">
+  <p>
+    <strong>Author:</strong> Lingxi Lu | Suzhou Foreign Language School
+  </p>
+  <p>
+    <a href="paper.pdf" target="_blank">Download PDF</a>
+  </p>
+</footer>
+
+<script>
+// Sim
+let simRunning=false,simRaf=null;
+const sim={debris:36500,col:0,year:0,hist:[36500],yrs:[0]};
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function poi(l){if(l<=0)return 0;if(l>30)return Math.max(0,Math.round(l+Math.sqrt(l)*randn()));let L=Math.exp(-l),k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+function lgn(mu,s){return Math.max(1,Math.floor(Math.exp(mu+s*randn())));}
+function mb32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function drawSim(){
+  const c=document.getElementById('simCanvas');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  if(!ctx)return;
+  const W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  const ex=W*.13,ey=H*.5,er=32;
+  const g=ctx.createRadialGradient(ex,ey,0,ex,ey,er);
+  g.addColorStop(0,'#1a3a6a');g.addColorStop(1,'#0d1f3f');
+  ctx.beginPath();ctx.arc(ex,ey,er,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();ctx.arc(ex,ey,100,0,Math.PI*2);ctx.strokeStyle='rgba(91,141,239,.12)';ctx.lineWidth=24;ctx.stroke();
+  const scale=Math.min(sim.debris/1500000,1),nD=Math.floor(scale*150),rng=mb32(42);
+  for(let i=0;i<nD;i++){const a=rng()*Math.PI*2,d=88+rng()*24;
+  ctx.beginPath();ctx.arc(ex+Math.cos(a)*d,ey+Math.sin(a)*d,1+rng(),0,Math.PI*2);
+  ctx.fillStyle='rgba(239,91,91,'+(.3+rng()*.7)+')';ctx.fill();}
+  const nS=Math.max(3,Math.floor(14*(1-scale*.4)));
+  for(let i=0;i<nS;i++){const a=(i/nS)*Math.PI*2+sim.year*.08,d=95+Math.sin(i*3.7)*12;
+  ctx.beginPath();ctx.arc(ex+Math.cos(a)*d,ey+Math.sin(a)*d,2,0,Math.PI*2);ctx.fillStyle='#5bef8d';ctx.fill();}
+  if(sim.hist.length>1){
+    const gx=W*.48,gy=H*.1,gw=W*.48,gh=H*.75;
+    ctx.fillStyle='rgba(15,26,48,.95)';ctx.fillRect(gx-6,gy-6,gw+12,gh+20);
+    ctx.strokeStyle='rgba(200,168,78,.15)';ctx.lineWidth=1;ctx.strokeRect(gx-6,gy-6,gw+12,gh+20);
+    ctx.strokeStyle='rgba(255,255,255,.1)';ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx,gy+gh);ctx.lineTo(gx+gw,gy+gh);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='8px Inter,sans-serif';ctx.textAlign='right';
+    for(let i=0;i<=4;i++){const y=gy+(i/4)*gh;ctx.fillText(((4-i)/4*1.5).toFixed(1)+'M',gx-5,y+3);}
+    ctx.textAlign='center';for(let i=0;i<=5;i++) ctx.fillText((i*10)+'y',gx+(i/5)*gw,gy+gh+12);
+    const maxD=1600000;
+    ctx.beginPath();ctx.strokeStyle='#c8a84e';ctx.lineWidth=1.5;
+    for(let i=0;i<sim.hist.length;i++){const x=gx+(sim.yrs[i]/50)*gw,y=gy+gh-(sim.hist[i]/maxD)*gh;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.stroke();
+    ctx.lineTo(gx+(sim.year/50)*gw,gy+gh);ctx.lineTo(gx,gy+gh);ctx.closePath();
+    ctx.fillStyle='rgba(200,168,78,.06)';ctx.fill();
+  }
+  const dEl=document.getElementById('sDebris'),cEl=document.getElementById('sCol'),yEl=document.getElementById('sYear');
+  if(dEl)dEl.textContent=Math.floor(sim.debris).toLocaleString();
+  if(cEl)cEl.textContent=sim.col.toLocaleString();
+  if(yEl)yEl.textContent=sim.year.toFixed(1);
+}
+
+function simStep(){
+  if(!simRunning)return;
+  const dt=.1,Nd=sim.debris,Ns=8000,sig=10e-6,v=10,T=31557600,V=1.292e11;
+  const Rds=Nd*Ns*sig*v*T/V,Rdd=.5*Nd*(Nd-1)*sig*v*T/V;
+  const nds=poi(Rds*dt),ndd=poi(Rdd*dt);
+  let nn=0;for(let i=0;i<nds;i++)nn+=lgn(5.5,.8);for(let i=0;i<ndd;i++)nn+=lgn(1.1,.5);
+  const decay=Nd*.005*dt*(.9+Math.random()*.2);
+  sim.debris=Math.max(Nd+nn-decay,0);sim.col+=nds+ndd;sim.year+=dt;
+  if(sim.year<=50){sim.hist.push(sim.debris);sim.yrs.push(sim.year);}
+  drawSim();
+  if(sim.year<50)simRaf=requestAnimationFrame(simStep);else simRunning=false;
+}
+function runSim(){if(simRunning)return;if(sim.year>=50)resetSim();simRunning=true;simStep();}
+function resetSim(){simRunning=false;if(simRaf)cancelAnimationFrame(simRaf);
+sim.debris=36500;sim.col=0;sim.year=0;sim.hist=[36500];sim.yrs=[0];drawSim();}
+drawSim();
+
+// Theme toggle
+const themeToggle=document.getElementById('themeToggle');
+const html=document.documentElement;
+const savedTheme=localStorage.getItem('theme');
+
+const moonSVG='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+const sunSVG='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+
+if(savedTheme){
+  html.setAttribute('data-theme',savedTheme);
+  document.getElementById('themeIcon').outerHTML=savedTheme==='dark'?sunSVG:moonSVG;
+  document.getElementById('themeLabel').textContent=savedTheme==='dark'?'Light':'Night';
+}
+
+themeToggle.addEventListener('click',()=>{
+  const current=html.getAttribute('data-theme');
+  const next=current==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  localStorage.setItem('theme',next);
+  document.getElementById('themeIcon').outerHTML=next==='dark'?sunSVG:moonSVG;
+  document.getElementById('themeLabel').textContent=next==='dark'?'Light':'Night';
+});
+</script>
+</body>
+</html>
