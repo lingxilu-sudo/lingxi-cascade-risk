@@ -138,6 +138,10 @@
   .footer { max-width: var(--max-width); margin: 4rem auto 2rem; padding: 2rem var(--spacing) 0; border-top: 1px solid var(--border); }
   .footer p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
   .footer strong { color: var(--text); }
+  .footer a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .footer a:hover { text-decoration: underline; }
+  .download-link { display: inline-block; margin-top: 0.8rem; font-size: 0.9rem; font-weight: 600; color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 2px; }
+  .download-link:hover { opacity: 0.7; }
 
   /* MOBILE */
   @media (max-width: 768px) {
@@ -168,6 +172,7 @@
 <section class="hero">
   <h1>Coupling orbital mechanics with actuarial science for satellite insurance pricing</h1>
   <a href="#summary" class="btn-primary">1-min summary &darr;</a>
+  <a href="paper.pdf" class="download-link" target="_blank">Download full paper (PDF)</a>
 </section>
 
 <!-- SUMMARY CARD -->
@@ -222,7 +227,7 @@
     <p>
       This framework presents the first quantitative model that couples physics-based
       cascade simulation with actuarial pricing. The result: insurance premiums that are
-      <strong>5 times higher</strong> than current market rates &mdash; a gap that
+      <strong>16.5 times higher</strong> than current market rates &mdash; a gap that
       represents both a systemic risk to insurers and a market failure in orbital
       sustainability.
     </p>
@@ -230,7 +235,7 @@
     <div class="info-box gold">
       <div class="ib-label">Why This Matters</div>
       <p>
-        If insurers underprice risk by 5&times;, operators have no economic incentive to
+        If insurers underprice risk by 16.5&times;, operators have no economic incentive to
         choose less congested orbits or invest in debris mitigation. Correct pricing
         aligns private costs with systemic risks &mdash; making sustainability a market
         force rather than a regulatory burden.
@@ -485,7 +490,7 @@
 
     <div class="stats-row">
       <div class="stat-box">
-        <div class="sv">5.0&times;</div>
+        <div class="sv">16.5&times;</div>
         <div class="sl">Premium<br>multiplier</div>
       </div>
       <div class="stat-box">
@@ -493,7 +498,7 @@
         <div class="sl">Debris growth<br>36.5K &rarr; 1.51M</div>
       </div>
       <div class="stat-box">
-        <div class="sv">$1.24M</div>
+        <div class="sv">$4.12M</div>
         <div class="sl">Per-policy<br>annual premium</div>
       </div>
       <div class="stat-box">
@@ -586,10 +591,10 @@
 <!-- FOOTER -->
 <footer id="contact" class="footer">
   <p>
-    <strong>Author:</strong> Lingxi Lu | Independent Researcher
+    <strong>Author:</strong> Lingxi Lu | Suzhou Foreign Language School
   </p>
   <p>
-    <strong>DOI:</strong> 10.5281/zenodo.xxxxxxx | Submitted to UNOOSA &amp; SGAC
+    <a href="paper.pdf" target="_blank">Download PDF</a>
   </p>
 </footer>
 

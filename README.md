@@ -20,12 +20,12 @@ The **Cascade Risk Framework** is the first model to couple **orbital mechanics-
 
 | Metric | Value |
 |--------|-------|
-| Debris growth (50 years) | 36,500 → 1.5M objects (41×) |
+| Debris growth (50 years) | 36,500 → 1.51M objects (41×) |
 | Historical premium | $125M/year |
-| Cascade-adjusted premium | $620M/year |
-| **Cascade factor** | **5.0×** |
-| VaR₉₅ | $405M/year |
-| CVaR₅ | $446M/year |
+| Cascade-adjusted premium | $2,058M/year |
+| **Cascade factor** | **16.5×** |
+| VaR₉₅ | $1,365M/year |
+| CVaR₉₅ | $1,565M/year |
 
 ## Quick Start
 

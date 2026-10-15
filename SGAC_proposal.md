@@ -12,7 +12,7 @@ Space insurance is priced off historical launch failure rates. Nobody models cas
 
 I built a model that does. It couples collision physics (Kessler-Flournoy rates, NASA breakup model, N² feedback) with actuarial pricing (VaR, CVaR, EVT, Solvency II decomposition).
 
-The result: cascade-adjusted premiums are **5.0x higher** than current historical-loss pricing. $620M vs. $125M per year for a 500-satellite portfolio.
+The result: cascade-adjusted premiums are **16.5x higher** than current historical-loss pricing. $2,058M vs. $125M per year for a 500-satellite portfolio — a roughly $1.9B/year unfunded liability for the market.
 
 ---
 
@@ -50,11 +50,11 @@ I'm a high school student. The model has limitations (single-shell, no ADR, no m
 
 ---
 
-## Available On Request
+## Already Public
 
-- Technical paper (~15 pages, full methodology)
-- Code (Python, CC BY 4.0)
-- Interactive explainer (HTML)
+- Paper (full methodology, CC BY 4.0): https://doi.org/10.5281/zenodo.23095041
+- Code (Python, Apache 2.0): https://github.com/lingxilu-sudo/lingxi-cascade-risk
+- Interactive explainer: https://4physics.xyz/explainer/
 
 **Email:** ling.xi.lu@gmail.com
 

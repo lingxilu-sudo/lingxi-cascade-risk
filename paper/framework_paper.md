@@ -152,38 +152,36 @@ These events collectively created over 7,300 trackable fragments and anchor the 
 
 | Metric | Definition | Value |
 |--------|-----------|-------|
-| Expected Loss | Mean annual portfolio loss | $277.7M |
-| Loss Std Dev | Standard deviation | $73.0M |
-| VaR₉₅ | 95th percentile of worst-year loss | $411.5M |
-| CVaR₉₅ (ES) | Expected shortfall beyond VaR₉₅ | $471.8M |
-| VaR₉₉ | 99th percentile of worst-year loss | $518.6M |
-| CVaR₉₉ (ES) | Expected shortfall beyond VaR₉₉ | $558.9M |
-| EVT VaR₉₅ | GPD-based tail estimate | $543.3M |
-| EVT VaR₉₉ | GPD-based tail estimate | $627.8M |
+| Expected Loss | Mean annual portfolio loss | $921.4M |
+| VaR₉₅ | 95th percentile of worst-year loss | $1,365M |
+| CVaR₉₅ (ES) | Expected shortfall beyond VaR₉₅ | $1,565M |
+| VaR₉₉ | 99th percentile of worst-year loss | $1,721M |
+| CVaR₉₉ (ES) | Expected shortfall beyond VaR₉₉ | $1,854M |
+| EVT VaR₉₅ | GPD-based tail estimate | $1,803M |
 | EVT shape (ξ) | Heavy-tail indicator | −0.032 |
 
 ### 3.3 Insurance Premium (Solvency II Decomposition)
 
 | Component | Formula | Amount |
 |-----------|---------|--------|
-| Expected Loss (EL) | Mean annual loss | $277.7M |
-| Risk Loading | 1.5 × (CVaR₉₅ − EL) | $291.2M |
-| Capital Charge | 4% × (VaR₉₉ − EL) | $9.6M |
-| Expense Loading | 15% × EL | $41.7M |
-| **Total Premium** | | **$620.2M/year** |
-| Per-policy premium | Total / 500 policies | $1,240,291/year |
+| Expected Loss (EL) | Mean annual loss | $921.4M |
+| Risk Loading | 1.5 × (CVaR₉₅ − EL) | $966.0M |
+| Capital Charge | 4% × (VaR₉₉ − EL) | $32.0M |
+| Expense Loading | 15% × EL | $138.2M |
+| **Total Premium** | | **$2,058M/year** |
+| Per-policy premium | Total / 500 policies | $4,116,000/year |
 | Historical premium | 0.5% × $50M × 500 | $125.0M/year |
-| **Cascade Factor** | Cascade / Historical | **5.0×** |
+| **Cascade Factor** | Cascade / Historical | **16.5×** |
 
 ### 3.4 Key Findings
 
 1. **Debris grows 41× over 50 years** under business-as-usual conditions, from 36,500 to ~1.51 million objects. The growth is super-exponential due to the N² dependence of debris-debris collision rates.
 
-2. **Historical pricing underestimates risk by 5.0×.** When cascade dynamics are included, the risk-adjusted premium increases from $125M to $620M per year. This $495M annual gap represents an unfunded liability in the space insurance market.
+2. **Historical pricing underestimates risk by 16.5×.** When cascade dynamics are included, the risk-adjusted premium increases from $125M to $2,058M per year. This $1,933M annual gap represents an unfunded liability in the space insurance market.
 
-3. **Tail risk is substantial.** CVaR₉₅ ($472M) exceeds the expected loss ($278M) by 70%, indicating that extreme cascade scenarios produce losses far above the mean. The EVT VaR₉₅ ($543M) exceeds the empirical VaR₉₅ ($411M) by 32%, confirming that tail events are more severe than the Monte Carlo sample alone suggests.
+3. **Tail risk is substantial.** CVaR₉₅ ($1,565M) exceeds the expected loss ($921M) by 70%, indicating that extreme cascade scenarios produce losses far above the mean. The EVT VaR₉₅ ($1,803M) exceeds the empirical VaR₉₅ ($1,365M) by 32%, confirming that tail events are more severe than the Monte Carlo sample alone suggests.
 
-4. **Risk loading dominates the premium.** The CVaR-based risk loading ($291M) exceeds the expected loss ($278M), reflecting the heavy-tailed nature of cascade losses. This is a direct consequence of the quadratic feedback mechanism.
+4. **Risk loading dominates the premium.** The CVaR-based risk loading ($966M) exceeds the expected loss ($921M), reflecting the heavy-tailed nature of cascade losses. This is a direct consequence of the quadratic feedback mechanism.
 
 5. **EVT indicates a bounded but heavy tail.** The GPD shape parameter ξ = −0.032 indicates a Type III (bounded) tail, but the large gap between empirical and EVT VaR estimates confirms that extreme events are non-negligible.
 
@@ -197,7 +195,7 @@ The debris growth trajectory is consistent with Liou & Johnson (2008), who found
 
 ### 4.2 Systemic Risk Implications
 
-The $495M annual gap between traditional pricing ($125M) and cascade-adjusted pricing ($620M) is not merely an academic finding — it represents a **systemic insolvency risk**. When debris density is high, all satellites face elevated risk simultaneously, meaning claims would be correlated across the entire portfolio. A major cascade event at current premium levels could exceed insurer reserves.
+The $1,933M annual gap between traditional pricing ($125M) and cascade-adjusted pricing ($2,058M) is not merely an academic finding — it represents a **systemic insolvency risk**. When debris density is high, all satellites face elevated risk simultaneously, meaning claims would be correlated across the entire portfolio. A major cascade event at current premium levels could exceed insurer reserves.
 
 ### 4.3 Market Design
 
@@ -224,7 +222,7 @@ Conversely, cascade-aware pricing creates economic incentives for sustainability
 
 ## 5. Conclusion
 
-This framework demonstrates that incorporating physics-based cascade dynamics into insurance pricing reveals a **5.0× underpricing** of LEO satellite risk. The model's key innovation is replacing ad-hoc cascade parameters with first-principles collision physics: debris growth is driven by actual collision rates computed from orbital mechanics, with fragment yields calibrated to real events and asymmetric treatment of debris-satellite versus debris-debris collisions. The framework provides insurers with a rigorous tool for quantifying cascade risk through VaR, CVaR, and EVT metrics, and decomposes premiums according to the Solvency II regulatory framework. The $495M annual pricing gap represents both a systemic risk to insurers and an opportunity for market-based debris mitigation incentives.
+This framework demonstrates that incorporating physics-based cascade dynamics into insurance pricing reveals a **16.5× underpricing** of LEO satellite risk. The model's key innovation is replacing ad-hoc cascade parameters with first-principles collision physics: debris growth is driven by actual collision rates computed from orbital mechanics, with fragment yields calibrated to real events and asymmetric treatment of debris-satellite versus debris-debris collisions. The framework provides insurers with a rigorous tool for quantifying cascade risk through VaR, CVaR, and EVT metrics, and decomposes premiums according to the Solvency II regulatory framework. The $1,933M annual pricing gap represents both a systemic risk to insurers and an opportunity for market-based debris mitigation incentives.
 
 ---
 

@@ -44,8 +44,8 @@ class TestLossModel:
         assert loss_dist.annual_losses.shape == (100, 50)
 
     def test_historical_loss(self):
-        loss = self.model.historical_loss(failure_rate=0.02)
-        assert loss == 0.02 * 50_000_000 * 500
+        loss = self.model.historical_loss(failure_rate=0.005)
+        assert loss == 0.005 * 50_000_000 * 500
 
 
 class TestRiskMetrics:
