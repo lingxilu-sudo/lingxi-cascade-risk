@@ -9,6 +9,10 @@ setup(
     author="Lingxi Lu",
     author_email="ling.xi.lu@gmail.com",
     packages=find_packages(),
+    # main.py is a top-level module, not part of a package; without this the
+    # `cascade-risk` console script fails with ModuleNotFoundError after a
+    # pip install.
+    py_modules=["main"],
     python_requires=">=3.9",
     install_requires=[
         "numpy>=1.20.0",

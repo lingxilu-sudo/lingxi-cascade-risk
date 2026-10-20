@@ -4,7 +4,7 @@
 """
 Premium Calculator
 ===================
-Computes risk-adjusted insurance premiums using the Solvency II framework:
+Computes risk-adjusted insurance premiums with a Solvency-II-style decomposition:
 
     Premium = EL + Risk Loading + Capital Charge + Expense Loading
 
@@ -13,6 +13,11 @@ where:
     Risk Loading = multiplier × (CVaR - EL)
     Capital Charge = cost of holding regulatory capital
     Expense Loading = fixed percentage for admin/profit
+
+The three loadings are pricing assumptions.  This is *not* the calculation
+prescribed by Directive 2009/138/EC: Solvency II applies a 6% cost of capital
+to the SCR, whereas the capital charge here uses `discount_rate` (4% by
+default) and the risk loading is a multiple of the CVaR excess.
 
 References:
     European Commission (2009). "Solvency II Directive." 2009/138/EC.
@@ -129,17 +134,22 @@ class PremiumCalculator:
         historical_premium: float,
     ) -> np.ndarray:
         """
-        Compute time-varying premium trajectory.
+        Compute the time-varying portfolio premium trajectory.
 
-        For each time step, compute the premium based on the median
-        loss across all Monte Carlo paths at that time.
+        At each time step the same four-part Solvency-II-style structure is used
+        as in ``compute_premium``: EL + risk loading + capital charge +
+        expense.  Percentiles and CVaR are taken across Monte Carlo paths
+        at that step, so the curve is consistent with the headline premium.
 
         Parameters
         ----------
         annual_losses : np.ndarray
-            (n_paths, n_steps) annual loss array.
+            (n_paths, n_steps) **portfolio-level** annual losses.  Passing
+            per-satellite losses here would understate the premium by a
+            factor of n_policies.
         historical_premium : float
-            Historical baseline premium.
+            Kept for API compatibility; the trajectory itself is expressed
+            in the same units as ``annual_losses``.
 
         Returns
         -------
@@ -147,21 +157,27 @@ class PremiumCalculator:
             Premium at each time step.
         """
         n_paths, n_steps = annual_losses.shape
-        median_losses = np.median(annual_losses, axis=0)
+        mean_loss = np.mean(annual_losses, axis=0)
+        var_95 = np.percentile(annual_losses, 95, axis=0)
+        var_99 = np.percentile(annual_losses, 99, axis=0)
 
-        premiums = np.zeros(n_steps)
+        cvar_95 = np.empty(n_steps)
         for t in range(n_steps):
-            el = median_losses[t]
-            risk_loading = self.risk_loading_multiplier * max(el * 0.1, 0)
-            expense = self.expense_loading * el
-            premiums[t] = el + risk_loading + expense
+            tail = annual_losses[annual_losses[:, t] >= var_95[t], t]
+            cvar_95[t] = tail.mean() if len(tail) else var_95[t]
 
-        return premiums
+        risk_loading = self.risk_loading_multiplier * np.maximum(
+            cvar_95 - mean_loss, 0.0)
+        capital_charge = self.discount_rate * np.maximum(
+            var_99 - mean_loss, 0.0)
+        expense = self.expense_loading * mean_loss
+
+        return mean_loss + risk_loading + capital_charge + expense
 
     def npv_of_premiums(
         self,
         premium_trajectory: np.ndarray,
-        dt_years: float = 0.01,
+        dt_years: float = 0.1,
     ) -> float:
         """
         Net Present Value of the premium trajectory.

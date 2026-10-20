@@ -25,7 +25,7 @@ calibration:
     relative_velocity_km_s: 8.0    # Head-on intercept
     trackable_fragments: 3500
     total_fragments_estimated: 150000
-    satellite_mass_kg: 750
+    satellite_mass_kg: 880          # matches KNOWN_EVENTS in historical_events.py
 
   # Kosmos 1408 ASAT Test (November 15, 2021)
   kosmos_1408:

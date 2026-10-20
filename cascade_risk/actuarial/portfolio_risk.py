@@ -38,8 +38,15 @@ class PortfolioRiskResult:
     portfolio_var_95: float
     portfolio_var_99: float
     portfolio_cvar_95: float
+    # n_policies × V_sat: the largest loss the portfolio can take in one year.
+    # Despite the name this is a capped exposure, not a sum of per-satellite
+    # 95% VaRs (a single satellite's 95% VaR is zero here; see below).
     sum_individual_var_95: float
-    diversification_ratio: float    # Portfolio VaR / Sum of Individual VaR
+    # Portfolio VaR95 divided by that exposure: the share of the maximum
+    # possible loss at the 95% level.  A concentration measure, not a
+    # diversification benefit.  NaN when a satellite's horizon hit
+    # probability is below 5%.
+    diversification_ratio: float
     expected_portfolio_loss: float
     loss_samples: np.ndarray
 
@@ -56,7 +63,10 @@ class PortfolioRiskModel:
     n_policies : int
         Number of insured satellites.
     correlation_coefficient : float
-        Pairwise correlation between satellite hit events (0 to 1).
+        Correlation of the *latent Gaussian* variables, not of the hit
+        indicators.  A Gaussian copula with latent correlation ρ induces a
+        weaker correlation between the resulting 0/1 hit events, so this is
+        an upper bound on the event correlation.
     v_satellite_usd : float
         Average satellite value (USD).
     """
@@ -92,8 +102,11 @@ class PortfolioRiskModel:
         """
         Simulate correlated portfolio losses using Gaussian Copula.
 
-        For each time step's hit probability, generate correlated
-        Bernoulli outcomes across all satellites.
+        For each time step, generate correlated Bernoulli outcomes across
+        all satellites.  The debris-population uncertainty is collapsed to
+        the cross-path mean hit probability at each step; this module
+        therefore measures portfolio aggregation at a fixed hazard, not the
+        full Monte Carlo loss distribution used in the headline premium.
 
         Parameters
         ----------
@@ -156,17 +169,21 @@ class PortfolioRiskModel:
         port_var_99 = float(np.percentile(max_losses, 99))
         port_cvar_95 = float(np.mean(max_losses[max_losses >= port_var_95])) if len(max_losses[max_losses >= port_var_95]) > 0 else port_var_95
 
-        # Sum of individual VaRs (no correlation, time-integrated)
-        # Use mean hit probability across all time steps for each satellite
-        avg_hit_prob = float(np.mean(mean_hit_prob))
-        individual_var_95 = float(np.percentile(
-            stats.bernoulli.rvs(avg_hit_prob, size=n_simulations) * self.v_satellite_usd,
-            95
-        ))
-        sum_individual_var_95 = individual_var_95 * n
-
-        # Diversification ratio
-        div_ratio = port_var_95 / sum_individual_var_95 if sum_individual_var_95 > 0 else 1.0
+        # "Sum of individual VaRs" denominator.
+        # A single satellite's 95% VaR over the horizon is 0 unless its hit
+        # probability exceeds 95%, so the textbook denominator is identically
+        # zero here and the ratio would divide by zero.  Instead we divide by
+        # the capped exposure n × V_sat (every satellite lost in one year),
+        # which turns the field into a concentration measure: the portfolio
+        # VaR95 as a share of the maximum possible loss.  Below a 5% horizon
+        # hit probability the ratio is not informative and is reported as NaN.
+        p_any_hit = 1.0 - float(np.prod(1.0 - np.clip(mean_hit_prob, 0.0, 1.0)))
+        if p_any_hit > 0.05:
+            sum_individual_var_95 = self.v_satellite_usd * n
+            div_ratio = port_var_95 / sum_individual_var_95
+        else:
+            sum_individual_var_95 = float("nan")
+            div_ratio = float("nan")
 
         return PortfolioRiskResult(
             portfolio_var_95=port_var_95,
@@ -180,7 +197,13 @@ class PortfolioRiskModel:
 
     @staticmethod
     def _nearest_positive_definite(matrix: np.ndarray) -> np.ndarray:
-        """Find nearest positive definite matrix (Higham 2002)."""
+        """Force a symmetric matrix to be positive definite.
+
+        For symmetric input the SVD of A is A = V S Vᵀ, so ``Vᵀ diag(s) V``
+        reconstructs A and the symmetrization changes nothing: this is a
+        diagonal-jitter fallback, not Higham's (2002) alternating projection,
+        and the result is shifted rather than "nearest".
+        """
         A = (matrix + matrix.T) / 2
         _, s, V = linalg.svd(A)
         H = V.T @ np.diag(s) @ V

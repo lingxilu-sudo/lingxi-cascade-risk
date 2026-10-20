@@ -4,19 +4,21 @@
 """
 Historical Event Calibration
 ==============================
-Calibrates the debris fragmentation model parameters against
-real collision events:
+Records three real fragmentation events and provides a consistency
+diagnostic for the fragment-yield scale:
 
 1. Iridium 33 × Cosmos 2251 (2009) — accidental collision
 2. Fengyun-1C ASAT test (2007) — intentional destruction
 3. Kosmos 1408 ASAT test (2021) — intentional destruction
 
-Uses observed fragment counts to calibrate the NASA Standard
-Breakup Model parameters (k_debris distribution).
+The observed counts are catalogue totals, not per-collision yields, and
+the fitted fragments-per-kilogram distribution is **not** wired into the
+simulation's ``k_debris`` parameters; it only bounds the yield scale to
+an order of magnitude.
 
 References:
-    Johnson, N.L. et al. (2001). "History of On-Orbit Satellite
-    Fragmentations." NASA/TM-2001-210780.
+    Johnson, N.L. et al. (2008). "History of On-Orbit Satellite
+    Fragmentations, 14th Edition." NASA Orbital Debris Program Office.
     Liou, J.-C. & Johnson, N.L. (2009). "A statistical analysis of
     the future debris environment." Acta Astronautica, 64(2-3), 244-253.
     NASA Orbital Debris Program Office. "Orbital Debris Quarterly News."
@@ -62,7 +64,7 @@ KNOWN_EVENTS: list[CollisionEvent] = [
         relative_velocity_km_s=8.0,
         trackable_fragments=3500,
         total_fragments_estimated=150_000,
-        total_mass_kg=750,
+        total_mass_kg=880,
     ),
     CollisionEvent(
         name="Kosmos 1408 ASAT",
@@ -78,13 +80,13 @@ KNOWN_EVENTS: list[CollisionEvent] = [
 
 class CalibrationEngine:
     """
-    Calibrates fragmentation model parameters against historical events.
+    Consistency checks against historical fragmentation events.
 
     The NASA Standard Breakup Model predicts:
         N(>D) = 0.1 × M^0.75 × E^0.5 × D^(-1.71)
 
-    We calibrate the log-normal distribution of k_debris (fragments per
-    collision) to match observed fragment counts.
+    ``calibrate_k_debris`` fits fragments per kilogram as a diagnostic;
+    it does not set the simulation's per-collision yield.
     """
 
     def __init__(self, events: list[CollisionEvent] = None):
@@ -92,11 +94,13 @@ class CalibrationEngine:
 
     def calibrate_k_debris(self) -> dict[str, float]:
         """
-        Calibrate log-normal parameters for fragments per collision.
+        Fit a log-normal to fragments **per kilogram of catalogue mass**.
 
-        Returns
-        -------
-        dict with 'mu' and 'sigma' for log-normal distribution.
+        Warning: this is not the operative yield.  The simulation samples
+        fragments **per collision** and adds them to a >10 cm count, while
+        ``total_fragments_estimated`` includes sub-centimetre debris.  The
+        result is therefore a consistency diagnostic only and is not wired
+        into ``k_debris_mu`` / ``k_debris_sigma``.
         """
         # For each event, compute fragments per kg
         fragments_per_kg = []

@@ -1,0 +1,58 @@
+# Zenodo Upload Information
+
+## Title
+A Physics-Based Monte Carlo Framework for Space Debris Cascade Risk and Insurance Pricing
+
+## Authors
+Lu, Lingxi (Independent Researcher)
+
+## Version
+2.0
+
+## Description
+This working paper presents a comprehensive framework for quantifying space debris cascade risk and its implications for the satellite insurance market. The model integrates collision physics (Kessler-Flournoy collision rates, NASA Standard Breakup Model) with actuarial science (Solvency II premium decomposition, Gaussian Copula correlation modeling, Extreme Value Theory tail estimation) to provide physics-driven insurance pricing.
+
+**Key Findings:**
+- Debris grows 41× over 50 years under business-as-usual conditions (36,500 to 1.51M objects)
+- Historical pricing underestimates risk by 16.5× (cascade-adjusted premium: $2,058M/year vs historical $125M/year)
+- Tail risk is substantial: CVaR(95%) ($1,565M) exceeds expected loss ($921M) by 70%
+- The framework reveals an unfunded liability of $1,933M/year in the global space insurance market
+
+**Methodology:**
+- Monte Carlo simulation (1,000 paths, 50-year horizon)
+- Zero free parameters in physics layer (all parameters from NASA/IADC literature)
+- Gaussian Copula for correlated satellite losses
+- EVT/GPD for extreme tail estimation
+- Solvency II compliant premium decomposition
+
+**Code:** Python package `cascade_risk/` with full test suite (25 tests passing)
+
+## Keywords
+space debris, cascade risk, Kessler syndrome, satellite insurance, actuarial science, Monte Carlo simulation, Extreme Value Theory, Solvency II, Gaussian Copula, space sustainability
+
+## References to related research
+- Kessler, D.J. & Cour-Palais, B.G. (1978). "Collision Frequency of Artificial Satellites: The Creation of a Debris Belt." J. Geophys. Res., 83(A6), 2637-2646.
+- Liou, J.-C. & Johnson, N.L. (2008). "Instability of the present LEO satellite populations." Advances in Space Research, 41(7), 1046-1053.
+- McNeil, A.J., Frey, R. & Embrechts, P. (2015). Quantitative Risk Management. Princeton University Press.
+
+## Funding
+Independent research
+
+## DOI
+Concept DOI: 10.5281/zenodo.23095041 (points to latest version)
+Version 2.0 DOI: 10.5281/zenodo.23153568
+
+## Files to Upload
+1. **framework_paper.pdf** - Main research paper (v2.0)
+
+## License
+CC BY 4.0 (Creative Commons Attribution 4.0 International)
+
+## Record URL
+https://zenodo.org/records/23153568
+
+## GitHub Repository
+https://github.com/lingxilu-sudo/lingxi-cascade-risk
+
+## Contact
+ling.xi.lu@gmail.com

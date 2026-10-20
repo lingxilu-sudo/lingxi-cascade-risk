@@ -13,13 +13,15 @@ The collision rate between two populations is:
 where n₁, n₂ are population counts, σ is the combined cross-section,
 v_rel is the mean relative velocity, and V_shell is the shell volume.
 
-Collision events follow a Poisson process, and each collision produces
-a random number of fragments drawn from the NASA Standard Breakup Model.
+Collision events follow a Poisson process, and each collision produces a
+random number of fragments from an event-anchored log-normal yield.  The
+NASA Standard Breakup Model is retained only as an order-of-magnitude
+anchor; it is not evaluated by the sampler.
 
 References:
     Kessler, D.J. (1981). Icarus, 48(1), 39-48.
-    Johnson, N.L. et al. (2001). "History of On-Orbit Satellite
-    Fragmentations." NASA/TM-2001-210780.
+    Johnson, N.L. et al. (2008). "History of On-Orbit Satellite
+    Fragmentations, 14th Edition." NASA Orbital Debris Program Office.
     Liou, J.-C. & Johnson, N.L. (2006). "Risks in Space from
     Orbiting Debris." Science, 311(5759), 340-341.
 """
@@ -148,21 +150,23 @@ class CollisionModel:
         collision_energy_j: Optional[float] = None,
     ) -> int:
         """
-        Sample number of fragments from NASA Standard Breakup Model.
+        Sample the number of trackable fragments from one collision.
 
-        N(>D_min) = 0.1 × M^0.75 × E^0.5 × D_min^(-1.71)
-
-        For trackable fragments (>10cm), D_min = 0.1 m.
-        We use a log-normal distribution calibrated to observed events.
+        The operative yield is the event-anchored log-normal distribution
+        specified by ``k_debris_mu`` / ``k_debris_sigma``.  The NASA
+        Standard Breakup Model in ``constants.py`` is retained as an
+        order-of-magnitude anchor but is **not** evaluated here.
 
         Parameters
         ----------
         rng : np.random.Generator
             Random number generator.
         total_mass_kg : float
-            Combined mass of colliding objects (kg).
+            Accepted for API compatibility; not used by the log-normal
+            sampler.
         collision_energy_j : float, optional
-            Collision kinetic energy (J). If None, estimated from v_rel.
+            Accepted for API compatibility; not used by the log-normal
+            sampler.
         """
         # Use log-normal distribution for stochastic fragment count
         n_fragments = int(rng.lognormal(self.k_debris_mu, self.k_debris_sigma))
@@ -228,3 +232,15 @@ class CollisionModel:
         """
         rate = self.collision_rate(n_debris, n_satellites)
         return min(rate / n_satellites, 1.0) if n_satellites > 0 else 0.0
+
+    @property
+    def saturation_population(self) -> float:
+        """Population at which each satellite is hit once per year on average.
+
+        N_sat = V_shell / (σ v_rel T_year) = 1/q.  Beyond this density the
+        dilute-gas rate formula is no longer physically meaningful and the
+        loss layer already clips the hit probability at 1.
+        """
+        q = (self._sigma_km2 * self._v_rel_km_per_year
+             / self.shell.volume_km3)
+        return 1.0 / q

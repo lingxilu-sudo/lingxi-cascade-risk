@@ -37,6 +37,14 @@ NASA_BREAKUP_COEFFICIENT = 0.1
 # dN/dD ∝ D^(-alpha), alpha ≈ 1.71 for debris > 1cm
 FRAGMENT_SIZE_POWER_LAW = 1.71
 
+# --- Event-anchored fragment yields (operative sampler) ---
+# Debris-satellite yields are configuration parameters (k_debris_mu/sigma).
+# Debris-debris yields are a fixed prior: LogNormal(1.1, 0.5), median ~3.
+# Keeping them here prevents the growth model and the sensitivity chart
+# from silently drifting apart.
+DD_FRAGMENT_MU = 1.1
+DD_FRAGMENT_SIGMA = 0.5
+
 # --- Unit conversions ---
 KM_TO_M = 1e3
 M_TO_KM = 1e-3

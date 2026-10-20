@@ -5,24 +5,35 @@
 Debris Growth Model
 ====================
 Implements the debris population dynamics as a stochastic ODE driven
-by collision physics (not a free parameter).
+by collision physics rather than by an imposed growth rate.
 
 The governing equation is:
-    dN/dt = R_collision(N) × k_debris - λ × N
+    dN/dt = R_ds(N) × k_ds + R_dd(N) × k_dd - λ × N
 
 where:
-    R_collision(N) = debris-satellite + debris-debris collision rate
-    k_debris = fragments per collision (log-normal distributed)
+    R_ds, R_dd = debris-satellite and debris-debris collision rates
+    k_ds = fragments per satellite collision (log-normal, median ~245)
+    k_dd = fragments per debris-debris collision (log-normal, median ~3)
     λ = natural orbital decay rate
 
-This replaces the ad-hoc `cascade_rate` parameter with physics-driven growth.
+Two modelling caveats.  Both channels share one characteristic cross-section
+(the 10 m² satellite section), so the debris-debris rate is an upper bound:
+a 1 m² debris-debris section roughly halves N(50).  And the DD fragments are
+added to the catalogue-scale count N (>10 cm) even though a few-fragment
+yield is more plausibly 1-10 cm debris; excluding them also roughly halves
+N(50).  Both choices raise the loss, so the headline is an upper bound in
+this dimension.
+
+This replaces the ad-hoc `cascade_rate` parameter with growth set by
+collision rates and sampled yields.
 
 References:
     Kessler, D.J. & Cour-Palais, B.G. (1978). "Collision Frequency of
     Artificial Satellites: The Creation of a Debris Belt."
     J. Geophys. Res., 83(A7), 2637-2646.
     Liou, J.-C. & Johnson, N.L. (2008). "Instability of the present
-    LEO satellite populations." Science, 319(5869), 1397-1399.
+    LEO satellite populations." Advances in Space Research, 41(7),
+    1046-1053.
 """
 
 from __future__ import annotations
@@ -34,6 +45,7 @@ import numpy as np
 
 from cascade_risk.physics.orbital_shell import OrbitalShell
 from cascade_risk.physics.collision_model import CollisionModel, CollisionEvent
+from cascade_risk.utils.constants import DD_FRAGMENT_MU, DD_FRAGMENT_SIGMA
 
 
 @dataclass
@@ -50,8 +62,8 @@ class DebrisGrowthModel:
     """
     Simulates debris population evolution with collision-driven growth.
 
-    The key innovation: debris growth is NOT driven by a free parameter
-    (`cascade_rate`) but by actual collision physics. Each collision
+    The key point: debris growth is set by collision rates and sampled
+    yields, not by an imposed `cascade_rate` parameter. Each collision
     event generates new fragments, which increase future collision rates.
 
     Parameters
@@ -82,7 +94,7 @@ class DebrisGrowthModel:
         self,
         n_debris_0: float,
         t_max_years: float = 50.0,
-        dt_years: float = 0.01,
+        dt_years: float = 0.1,
         decay_uncertainty: float = 0.1,
         rng: Optional[np.random.Generator] = None,
     ) -> DebrisState:
@@ -146,7 +158,8 @@ class DebrisGrowthModel:
 
             # Generate new fragments (vectorized, different yields per collision type)
             if n_dd_events > 0:
-                n_dd_frag = int(np.sum(rng.lognormal(1.1, 0.5, size=n_dd_events)))
+                n_dd_frag = int(np.sum(rng.lognormal(
+                    DD_FRAGMENT_MU, DD_FRAGMENT_SIGMA, size=n_dd_events)))
             else:
                 n_dd_frag = 0
 
@@ -198,7 +211,7 @@ class DebrisGrowthModel:
         self,
         n_debris_0: float,
         t_max_years: float = 50.0,
-        dt_years: float = 0.01,
+        dt_years: float = 0.1,
         decay_uncertainty: float = 0.1,
         rng: Optional[np.random.Generator] = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -211,8 +224,9 @@ class DebrisGrowthModel:
             Time array (years).
         n_debris : np.ndarray
             Debris population at each time step.
-        annual_collisions : np.ndarray
-            Cumulative collisions at each time step.
+        cumulative_collisions : np.ndarray
+            Cumulative collision count at each time step (despite the
+            historical variable name ``annual_collisions``).
         """
         if rng is None:
             rng = np.random.default_rng()
@@ -232,6 +246,22 @@ class DebrisGrowthModel:
             if i == n_steps - 1:
                 break
 
+            # Numerical / physical guard.  R_dd ∝ N², so once N approaches
+            # the saturation scale 1/q the per-step Poisson count grows into
+            # the billions and the log-normal draw tries to allocate tens of
+            # GB (at σ=20 m² this happened inside the 50-year horizon).  The
+            # dilute-gas rate is meaningless there anyway; fail loudly instead
+            # of exhausting memory.
+            n_saturation = self.collision_model.saturation_population
+            if n_debris >= n_saturation:
+                raise RuntimeError(
+                    f"Debris population reached the shell-saturation scale "
+                    f"({n_debris:,.0f} >= {n_saturation:,.0f}) at "
+                    f"t={times[i]:.1f} yr. The dilute-gas collision rate no "
+                    f"longer applies; shorten t_max_years or reduce the "
+                    f"cross-section / relative velocity."
+                )
+
             # Stochastic decay
             decay_noise = rng.normal(1.0, decay_uncertainty)
             effective_decay = self.decay_rate_per_year * max(decay_noise, 0.1)
@@ -246,13 +276,15 @@ class DebrisGrowthModel:
             total_events = n_ds + n_dd
 
             # Generate new fragments (vectorized)
-            # Debris-debris collisions produce fewer fragments than satellite collisions
-            # Small debris fragments (~1-10cm) colliding produce ~1-5 new fragments
+            # The DD yield is small (median ~3) but every fragment is added
+            # to the same catalogue-scale count N (>10 cm).  Treating DD
+            # fragments as catalogue objects is an upper-bound assumption:
+            # removing them roughly halves N(50) and the expected loss.
             # Satellite collisions produce ~100-1000 fragments (NASA breakup model)
             if n_dd > 0:
                 # Debris-debris: small fragment yield (log-normal, median ~3)
                 n_dd_fragments = int(np.sum(rng.lognormal(
-                    1.1, 0.5, size=n_dd,
+                    DD_FRAGMENT_MU, DD_FRAGMENT_SIGMA, size=n_dd,
                 )))
             else:
                 n_dd_fragments = 0

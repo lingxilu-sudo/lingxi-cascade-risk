@@ -54,7 +54,8 @@ class RiskMetricsCalculator:
     Parameters
     ----------
     confidence_levels : list[float]
-        Confidence levels for VaR/CVaR (e.g., [0.95, 0.99]).
+        Accepted for API compatibility; RiskMetrics exposes fixed 95% and 99%
+        fields, so other levels are not reported.
     evt_threshold_percentile : float
         Percentile above which to fit EVT (default 90).
     """
@@ -101,12 +102,15 @@ class RiskMetricsCalculator:
         # EVT tail estimation
         evt_result = self._fit_evt(losses)
         if evt_result is not None:
-            shape, scale, threshold = evt_result
+            shape, scale, threshold, exceedance_ratio = evt_result
             metrics.evt_shape_parameter = shape
             metrics.evt_scale_parameter = scale
-            metrics.evt_var_95 = self._evt_var(shape, scale, threshold, 0.95)
-            metrics.evt_var_99 = self._evt_var(shape, scale, threshold, 0.99)
-            metrics.evt_cvar_95 = self._evt_cvar(shape, scale, threshold, 0.95)
+            metrics.evt_var_95 = self._evt_var(
+                shape, scale, threshold, 0.95, exceedance_ratio)
+            metrics.evt_var_99 = self._evt_var(
+                shape, scale, threshold, 0.99, exceedance_ratio)
+            metrics.evt_cvar_95 = self._evt_cvar(
+                shape, scale, threshold, 0.95, exceedance_ratio)
 
         # Cascade factors
         if historical_premium > 0:
@@ -126,11 +130,13 @@ class RiskMetricsCalculator:
 
     def _fit_evt(
         self, losses: np.ndarray
-    ) -> Optional[tuple[float, float, float]]:
+    ) -> Optional[tuple[float, float, float, float]]:
         """
         Fit Generalized Pareto Distribution to tail losses.
 
-        Returns (shape, scale, threshold) or None if fit fails.
+        Returns (shape, scale, threshold, exceedance_ratio) or None if fit
+        fails.  The exceedance ratio zeta = P(L > u) is required to convert
+        the conditional GPD quantile into an unconditional VaR.
         """
         threshold = float(np.percentile(losses, self.evt_threshold_percentile))
         excesses = losses[losses > threshold] - threshold
@@ -140,28 +146,37 @@ class RiskMetricsCalculator:
 
         try:
             shape, loc, scale = stats.genpareto.fit(excesses, floc=0)
-            return float(shape), float(scale), threshold
+            exceedance_ratio = len(excesses) / len(losses)
+            return (float(shape), float(scale), threshold,
+                    float(exceedance_ratio))
         except Exception:
             return None
 
     @staticmethod
     def _evt_var(
-        shape: float, scale: float, threshold: float, confidence: float
+        shape: float, scale: float, threshold: float, confidence: float,
+        exceedance_ratio: float = 1.0,
     ) -> float:
-        """VaR from GPD fit."""
-        n_exceedances_ratio = 1.0 - confidence  # Simplified
+        """Unconditional VaR from a GPD fit above threshold u.
+
+        Standard peaks-over-threshold result:
+            VaR_p = u + (beta/xi) * [((1-p)/zeta)^(-xi) - 1]
+        where zeta = P(L > u).  Omitting zeta (i.e. zeta=1) assumes every
+        observation is an exceedance and overstates the tail quantile.
+        """
+        tail_prob = (1.0 - confidence) / exceedance_ratio
         if abs(shape) < 1e-10:
-            return threshold + scale * (-np.log(1 - confidence))
-        return threshold + scale / shape * (
-            (1 - confidence) ** (-shape) - 1
-        )
+            return threshold + scale * (-np.log(tail_prob))
+        return threshold + scale / shape * (tail_prob ** (-shape) - 1)
 
     @staticmethod
     def _evt_cvar(
-        shape: float, scale: float, threshold: float, confidence: float
+        shape: float, scale: float, threshold: float, confidence: float,
+        exceedance_ratio: float = 1.0,
     ) -> float:
-        """CVaR from GPD fit."""
-        var = RiskMetricsCalculator._evt_var(shape, scale, threshold, confidence)
+        """CVaR from a GPD fit."""
+        var = RiskMetricsCalculator._evt_var(
+            shape, scale, threshold, confidence, exceedance_ratio)
         if shape >= 1:
             return float("inf")  # CVaR undefined for shape >= 1
         if abs(shape) < 1e-10:

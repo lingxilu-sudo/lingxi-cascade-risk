@@ -35,6 +35,19 @@ class TestOrbitalShell:
         K = shell.carrying_capacity(cross_section_m2=10.0, v_rel_km_s=10.0)
         assert K > 0
 
+    def test_carrying_capacity_responds_to_decay(self):
+        """A hard-coded decay rate silently disconnected K from the model."""
+        shell = OrbitalShell(altitude_km=800, thickness_km=200)
+        k_base = shell.carrying_capacity(10.0, 10.0, 0.005)
+        k_fast = shell.carrying_capacity(10.0, 10.0, 0.05)
+        assert k_fast == pytest.approx(10.0 * k_base, rel=1e-12)
+        with pytest.raises(ValueError):
+            shell.carrying_capacity(10.0, 10.0, 0.0)
+
+    def test_repr_is_ascii(self):
+        """repr() is printed by main.py; non-ASCII crashes GBK consoles."""
+        assert OrbitalShell().__repr__().isascii()
+
 
 class TestCollisionModel:
     def setup_method(self):
@@ -67,7 +80,7 @@ class TestCollisionModel:
     def test_poisson_events(self):
         rng = np.random.default_rng(42)
         n_events = self.model.poisson_collision_events(
-            n_debris=36500, n_satellites=8000, dt_years=0.01, rng=rng
+            n_debris=36500, n_satellites=8000, dt_years=0.1, rng=rng
         )
         assert n_events >= 0
 
@@ -117,3 +130,24 @@ class TestDebrisGrowth:
         )
         # With collisions, debris should generally increase
         assert debris[-1] >= debris[0] * 0.5  # At least not much less
+
+
+class TestSaturationGuard:
+    def test_saturation_population_is_inverse_q(self):
+        shell = OrbitalShell(altitude_km=800, thickness_km=200)
+        cm = CollisionModel(shell=shell, cross_section_m2=10.0, v_rel_km_s=10.0)
+        assert cm.saturation_population == pytest.approx(4.10e7, rel=0.01)
+
+    def test_blow_up_raises_instead_of_allocating_gigabytes(self):
+        """At sigma=20 m^2 the 50-year run used to request a 52 GiB array."""
+        shell = OrbitalShell(altitude_km=800, thickness_km=200)
+        cm = CollisionModel(shell=shell, cross_section_m2=20.0, v_rel_km_s=10.0)
+        gm = DebrisGrowthModel(
+            shell=shell, collision_model=cm,
+            n_satellites=8000, decay_rate_per_year=0.005,
+        )
+        with pytest.raises(RuntimeError, match="saturation scale"):
+            gm.simulate_trajectory(
+                n_debris_0=36500, t_max_years=50.0, dt_years=0.1,
+                rng=np.random.default_rng(42),
+            )

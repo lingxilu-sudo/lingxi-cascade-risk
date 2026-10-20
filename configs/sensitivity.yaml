@@ -1,6 +1,9 @@
 # ============================================================================
 # Sensitivity Analysis Configuration
 # ============================================================================
+# NOTE: documentation only — no code path loads this file.  The tornado chart
+# uses the ranges in cascade_risk/analysis/visualization.py, and
+# sobol_analysis() receives explicit param_bounds from the caller.
 # One-at-a-time (OAT) and Sobol global sensitivity ranges.
 
 sensitivity:

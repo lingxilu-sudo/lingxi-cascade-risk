@@ -8,11 +8,11 @@
 
 ## The Idea
 
-Space insurance is priced off historical launch failure rates. Nobody models cascade risk — the possibility that one collision triggers a chain reaction, hitting an entire portfolio at once.
+Space insurance is priced off launch and in-orbit failure experience. Nobody models cascade risk — the possibility that one collision triggers a chain reaction, hitting an entire portfolio at once.
 
-I built a model that does. It couples collision physics (Kessler-Flournoy rates, NASA breakup model, N² feedback) with actuarial pricing (VaR, CVaR, EVT, Solvency II decomposition).
+I built a model that does. It couples collision physics (Kessler-Flournoy rates, event-anchored fragment yields, N² feedback) with actuarial pricing (VaR, CVaR, EVT as a diagnostic, Solvency-II-style premium decomposition).
 
-The result: cascade-adjusted premiums are **16.5x higher** than current historical-loss pricing. $2,058M vs. $125M per year for a 500-satellite portfolio — a roughly $1.9B/year unfunded liability for the market.
+The result: by year 50 of the horizon, cascade-adjusted premiums are **16.5x** a static 0.5%-of-hull benchmark. $2,058M vs. $125M per year for a 500-satellite portfolio. Timing matters: at year 0 the same model's expected loss is $22.3M, only 0.18x the benchmark, and it catches up around year 25. The finding is that a premium which never updates falls behind a growing cascade; it is not a claim that today's market is 16.5x wrong. Because the test portfolio concentrates 500 satellites in one shell, the year-50 gap also exceeds the ~$1.2B global market — a solvency signal for a concentrated book, not a market-wide forecast. One caveat cuts the other way: the debris–debris term is deliberately generous (its ~3 fragments per event are counted as >10 cm objects and share the 10 m² satellite cross-section), so the headline is an upper bound in that dimension — removing those fragments or using a 1 m² debris–debris section roughly halves the year-50 expected loss.
 
 ---
 
@@ -24,7 +24,7 @@ The result: cascade-adjusted premiums are **16.5x higher** than current historic
 - Translates debris populations into loss distributions
 - Extracts risk metrics and computes insurance premiums
 
-Calibrated against three real events: Fengyun-1C (2007), Iridium-Cosmos (2009), Kosmos 1408 (2021).
+Checked against three real events as order-of-magnitude anchors, not a formal calibration: Fengyun-1C (2007), Iridium-Cosmos (2009), Kosmos 1408 (2021).
 
 ---
 
@@ -32,7 +32,7 @@ Calibrated against three real events: Fengyun-1C (2007), Iridium-Cosmos (2009), 
 
 If premiums don't reflect cascade risk:
 
-- Insurers face insolvency from correlated claims
+- A concentrated book faces correlated claims it has not reserved for
 - No market incentive for operators to choose less congested orbits
 - The UN Space 2030 Agenda has no economic enforcement mechanism
 
@@ -46,7 +46,7 @@ Risk-adjusted pricing could fix this. Operators in congested shells pay more. Th
 2. Possible transmission to UNCOPUOS
 3. Collaboration opportunities
 
-I'm a high school student. The model has limitations (single-shell, no ADR, no multi-altitude dynamics). But the core insight — that physics-based cascade risk should inform insurance pricing — seems worth pursuing.
+I'm a high school student. The model has limitations (one shell with the entire global catalogue assigned to it, no ADR, no multi-altitude dynamics, a mean-field backbone that diverges about 11 years beyond the horizon); each is quantified in the paper. But the core insight — that physics-based cascade risk should inform insurance pricing — seems worth pursuing.
 
 ---
 

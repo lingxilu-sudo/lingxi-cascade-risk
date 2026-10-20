@@ -27,6 +27,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
+from cascade_risk.utils.constants import DD_FRAGMENT_MU, DD_FRAGMENT_SIGMA
+
 # --- Publication style settings ---
 rcParams.update({
     "figure.dpi": 150,
@@ -133,7 +135,7 @@ class PlotGenerator:
 
         ax.set_xlabel("Maximum Annual Loss (Million USD)")
         ax.set_ylabel("Probability Density")
-        ax.set_title("Loss Distribution from Monte Carlo Simulation")
+        ax.set_title("Worst-Year Loss Across Debris Paths")
         ax.legend(fontsize=9)
 
         path = self.output_dir / "loss_distribution.png"
@@ -151,30 +153,32 @@ class PlotGenerator:
 
         hit_prob = loss_model.compute_hit_probability(
             result.all_n_debris,
-            phys_config.n_debris_large,
             cross_section_m2=phys_config.cross_section_large_m2,
             v_rel_km_s=phys_config.relative_velocity_km_s,
             shell_volume_km3=shell.volume_km3,
         )
 
-        annual_losses = hit_prob * loss_model.v_satellite_usd
+        # Portfolio-level annual losses: per-satellite loss × number of
+        # insured satellites.  Omitting n_policies would plot a per-satellite
+        # premium against a portfolio historical premium (~500x too low).
+        annual_losses = hit_prob * loss_model.v_satellite_usd * loss_model.n_policies
         prem_time = premium_calc.compute_time_varying_premium(annual_losses, historical_prem)
 
-        prem_median = np.median(prem_time, axis=0) / 1e6 if prem_time.ndim > 1 else prem_time / 1e6
-        prem_p5 = np.percentile(prem_time, 5, axis=0) / 1e6 if prem_time.ndim > 1 else prem_time / 1e6
-        prem_p95 = np.percentile(prem_time, 95, axis=0) / 1e6 if prem_time.ndim > 1 else prem_time / 1e6
+        # The trajectory is a pointwise composite of cross-path percentiles
+        # (mean, CVaR95, VaR99), not a sample of premium paths, so it has no
+        # sampling distribution and no confidence band can be drawn from it.
+        prem_curve = prem_time / 1e6
 
         hist_prem_m = historical_prem / 1e6
         ax.plot(result.times, np.full_like(result.times, hist_prem_m),
-                color=COLORS["blue"], linewidth=2, linestyle="--", label="Historical Pricing")
-        ax.plot(result.times, prem_median, color=COLORS["red"], linewidth=2.5,
-                label="Cascade-Adjusted (median)")
-        ax.fill_between(result.times, prem_p5, prem_p95, alpha=0.2, color=COLORS["red"],
-                        label="90% confidence band")
+                color=COLORS["blue"], linewidth=2, linestyle="--",
+                label="Static 0.5% benchmark (assumption)")
+        ax.plot(result.times, prem_curve, color=COLORS["red"], linewidth=2.5,
+                label=f"Cascade-adjusted (year-50: ${prem_curve[-1]:,.0f}M)")
 
         ax.set_xlabel("Time (years)")
         ax.set_ylabel("Annual Insurance Premium (Million USD)")
-        ax.set_title("Insurance Premium: Historical vs Cascade-Adjusted")
+        ax.set_title("Static Benchmark vs Cascade-Adjusted Premium")
         ax.legend()
         ax.set_ylim(bottom=0)
 
@@ -206,7 +210,7 @@ class PlotGenerator:
             bottom += value
 
         ax.set_ylabel("Premium (Million USD)")
-        ax.set_title("Insurance Premium Breakdown (Solvency II Framework)")
+        ax.set_title("Insurance Premium Breakdown (Solvency-II-style)")
         ax.legend(loc="upper right", fontsize=9)
 
         path = self.output_dir / "premium_breakdown.png"
@@ -219,41 +223,102 @@ class PlotGenerator:
     # ------------------------------------------------------------------
 
     def plot_sensitivity_tornado(self, models, config):
-        """Tornado chart showing parameter sensitivity."""
+        """Analytic one-at-a-time sensitivity of the time-to-singularity.
+
+        This is deliberately *not* a re-run of the Monte Carlo model (that
+        would cost minutes per parameter).  It solves the deterministic
+        mean-field backbone
+
+            dN/dt = (b - lambda) N + a N^2
+
+        whose closed-form solution diverges at
+
+            t* = ln(1 + alpha / (a N0)) / alpha,   alpha = b - lambda.
+
+        Reporting N(50) instead would be uninformative: with the baseline
+        parameters t* = 61 years, so many one-at-a-time intervals push the
+        singularity inside the 50-year horizon and N(50) diverges.  The
+        singularity time is finite in every case and shows directly which
+        parameters can move the blow-up inside the horizon.  This is an
+        analytic OAT, not a variance-based Sobol index.
+        """
         fig, ax = plt.subplots(figsize=(10, 6))
 
+        shell = models["shell"]
+        p = config.physics
+
+        n0 = p.n_debris_large
+
+        def t_star(k_mu, decay, v_rel, n_sat, sigma_m2,
+                   k_dd_mu=DD_FRAGMENT_MU):
+            q = sigma_m2 * 1e-6 * v_rel * 31557600.0 / shell.volume_km3
+            b = float(np.exp(k_mu + p.k_debris_sigma ** 2 / 2)) * n_sat * q
+            k_dd = float(np.exp(k_dd_mu + DD_FRAGMENT_SIGMA ** 2 / 2))
+            a = 0.5 * k_dd * q
+            alpha = b - decay
+            if alpha <= 0:
+                return np.inf  # decay dominates: no finite-time blow-up
+            ratio = alpha / (a * n0)
+            return float(np.log1p(ratio) / alpha)
+
+        base = dict(
+            k_mu=p.k_debris_mu,
+            decay=p.decay_rate_per_year,
+            v_rel=p.relative_velocity_km_s,
+            n_sat=p.n_satellites,
+            sigma_m2=p.cross_section_large_m2,
+            k_dd_mu=DD_FRAGMENT_MU,
+        )
         params = {
-            "Debris Yield (μ)": (4.5, 6.5, config.physics.k_debris_mu, "k_debris_mu"),
-            "Orbital Decay Rate": (0.002, 0.010, config.physics.decay_rate_per_year, "decay_rate"),
-            "Relative Velocity": (7.0, 14.0, config.physics.relative_velocity_km_s, "v_rel"),
-            "Satellite Value": (20e6, 100e6, config.economics.v_satellite_usd, "v_sat"),
-            "Portfolio Correlation": (0.0, 0.8, config.economics.correlation_coefficient, "corr"),
+            "Debris yield (ln-mean)": ("k_mu", 4.5, 6.5),
+            "DD yield (ln-mean)": ("k_dd_mu", 0.6, 1.6),
+            "Cross-section": ("sigma_m2", 5.0, 20.0),
+            "Active satellites": ("n_sat", 4000, 12000),
+            "Relative velocity": ("v_rel", 7.0, 14.0),
+            "Orbital decay rate": ("decay", 0.002, 0.010),
         }
 
-        names = []
-        impacts = []
-        for label, (low, high, base, key) in params.items():
-            test_vals = np.linspace(low, high, 20)
-            # Simplified: scale loss linearly with parameter
-            base_loss = config.economics.v_satellite_usd * 0.05
-            losses = base_loss * (test_vals / base)
-            impact = (np.max(losses) - np.min(losses)) / 1e6
-            names.append(label)
-            impacts.append(impact)
+        rows = []
+        for label, (key, low, high) in params.items():
+            lo = dict(base); lo[key] = low
+            hi = dict(base); hi[key] = high
+            rows.append((label, t_star(**lo), t_star(**hi)))
+        rows.sort(key=lambda row: min(row[1], row[2]))
 
-        sorted_idx = np.argsort(impacts)
-        names_sorted = [names[i] for i in sorted_idx]
-        impacts_sorted = [impacts[i] for i in sorted_idx]
+        x_max = 160.0
+        y_positions = np.arange(len(rows))
+        for y, (label, t_lo, t_hi) in zip(y_positions, rows):
+            finite = [t for t in (t_lo, t_hi) if np.isfinite(t)]
+            crosses = bool(finite) and min(finite) < 50.0
+            color = COLORS["red"] if crosses else COLORS["blue"]
+            if finite:
+                left, right = min(finite), min(max(finite), x_max)
+                ax.plot([left, right], [y, y], color=color, linewidth=4, solid_capstyle="round")
+                for t in (t_lo, t_hi):
+                    if np.isfinite(t):
+                        ax.plot(t, y, "o", color=color, markersize=7)
+                        ax.annotate(f"{t:.0f}", (t, y), textcoords="offset points",
+                                    xytext=(0, 9), ha="center", fontsize=8, color=color)
+                    else:
+                        ax.annotate("no blow-up", (x_max, y), textcoords="offset points",
+                                    xytext=(-4, 9), ha="right", fontsize=8, color=color)
+            else:
+                ax.annotate("no finite-time blow-up in this range", (x_max, y),
+                            textcoords="offset points", xytext=(-4, 0), ha="right",
+                            fontsize=8, color=color)
 
-        colors_list = [COLORS["blue"] if x < np.median(impacts_sorted) else COLORS["red"]
-                       for x in impacts_sorted]
+        ax.axvline(50.0, color=COLORS["black"], linestyle="--", linewidth=1.5,
+                   label="50-year simulation horizon")
+        ax.axvline(61.1, color=COLORS["green"], linestyle=":", linewidth=1.5,
+                   label="Baseline t* = 61.1 years")
 
-        ax.barh(range(len(names_sorted)), impacts_sorted, color=colors_list,
-                edgecolor="white")
-        ax.set_yticks(range(len(names_sorted)))
-        ax.set_yticklabels(names_sorted)
-        ax.set_xlabel("Premium Sensitivity (Million USD range)")
-        ax.set_title("Sensitivity Analysis: What Drives Insurance Premium?")
+        ax.set_yticks(y_positions)
+        ax.set_yticklabels([row[0] for row in rows])
+        ax.set_xlim(20.0, x_max)
+        ax.set_xlabel("Time to finite-time singularity t* (years)")
+        ax.set_title("Analytic OAT Sensitivity: Can One Parameter Move the\n"
+                     "Singularity Inside the 50-Year Horizon?")
+        ax.legend(loc="upper right", fontsize=9)
 
         path = self.output_dir / "sensitivity_tornado.png"
         fig.savefig(path)

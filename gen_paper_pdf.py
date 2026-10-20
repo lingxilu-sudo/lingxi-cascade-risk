@@ -161,7 +161,7 @@ story.append(Paragraph("<b>Abstract</b>", ParagraphStyle(
     spaceBefore=4, spaceAfter=4
 )))
 story.append(Paragraph(
-    "The commercial space insurance market was worth about $1.2 billion in 2025. It prices satellite risk using historical launch failure rates. But no actuarial model accounts for cascade risk, where one collision generates debris that triggers more collisions, producing correlated losses across a portfolio. I build a coupled physics-actuarial framework to address this. For the physics piece, I wrote Monte Carlo code that tracks debris cascades in Low Earth Orbit (LEO). Collision rates come straight from orbital mechanics, not fitted parameters. On the pricing side, I used Value at Risk (VaR), Conditional VaR (CVaR), and Extreme Value Theory (EVT) to convert loss distributions into premiums. I set the simulation at 800 km and ran it for 50 years. Debris went from 36,500 to roughly 1.51 million objects. The premiums I get are <i>16.5 times higher</i> than what historical-loss pricing would give, $2,058 million against $125 million per year for 500 satellites. That $1,933 million gap is a systemic insolvency risk for the global space insurance market. It also undermines long-term sustainability of outer space activities. I anchor the model to three real collision events and break down premiums following the Solvency II framework. I also talk about what this means for the UN Space 2030 Agenda and argue that risk-adjusted pricing could serve as an economic instrument for orbital sustainability.",
+    "The commercial space insurance market was worth about $1.2 billion in 2025 (industry estimates vary). It prices satellite risk using launch and in-orbit failure experience. But no actuarial model accounts for cascade risk, where one collision generates debris that triggers more collisions, producing correlated losses across a portfolio. I build a coupled physics-actuarial framework to address this. For the physics piece, I wrote Monte Carlo code that tracks debris cascades in Low Earth Orbit (LEO). Collision rates come straight from orbital mechanics, not a separately tuned cascade-rate parameter. On the pricing side, I used Value at Risk (VaR), Conditional VaR (CVaR), and Extreme Value Theory (EVT) to convert loss distributions into premiums. I set the simulation at 800 km and ran it for 50 years. Debris went from 36,500 to roughly 1.51 million objects. The premiums I get are <i>16.5 times higher</i> than a 0.5%-of-hull-value in-orbit failure benchmark, $2,058 million against $125 million per year for 500 satellites; on expected loss alone the gap is 7.4 times. The $1,933 million gap is a systemic solvency concern for a portfolio concentrated in one shell, and it undermines long-term sustainability of outer space activities. I check the model against three real collision events and break down premiums following the Solvency II framework. I also discuss what this means for the UN Space 2030 Agenda and argue that risk-adjusted pricing could serve as an economic instrument for orbital sustainability. The 16.5x is conditional: it assigns the entire >10 cm catalogue to the 700-900 km shell, uses expected claim counts, and the mean-field backbone reaches a finite-time singularity at t* = 61 years, only 11 years beyond the horizon.",
     body_style
 ))
 
@@ -181,11 +181,11 @@ story.append(Paragraph("1. Introduction", h1_style))
 
 story.append(Paragraph("1.1 The Unpriced Risk to Orbital Sustainability", h2_style))
 story.append(Paragraph(
-    "The space debris environment in Low Earth Orbit (LEO) has changed. It is no longer a background condition. It is an active operating cost. Tracking networks currently count over 36,500 objects larger than 10 cm in Earth orbit. On top of that, there are roughly 1 million objects between 1-10 cm and 130 million smaller fragments, according to the ESA Space Environment Report (2025). The World Economic Forum put a price tag on this: $25.8-$42.3 billion in debris-related costs for LEO assets between 2025 and 2035, assuming nothing changes. That kind of trajectory does not square with the long-term sustainability goals in the UN Space 2030 Agenda or the IADC Space Debris Mitigation Guidelines.",
+    "The space debris environment in Low Earth Orbit (LEO) has changed. It is no longer a background condition. It is an active operating cost. Tracking networks currently count approximately 36,500 objects larger than 10 cm in Earth orbit. On top of that, there are roughly 1 million objects between 1-10 cm and 130 million smaller fragments, according to the ESA Space Environment Report (2025). The World Economic Forum put a price tag on this: $25.8-$42.3 billion in debris-related costs for LEO assets between 2025 and 2035, assuming nothing changes. That kind of trajectory does not square with the long-term sustainability goals in the UN Space 2030 Agenda or the IADC Space Debris Mitigation Guidelines.",
     body_style
 ))
 story.append(Paragraph(
-    "And yet the $1.2 billion space insurance market still prices risk the old way, using historical loss data. Mostly launch failure rates and single-asset collision probabilities. <i>Nobody is modeling the chance that one debris event sets off a cascade</i>, generating correlated claims across a whole portfolio at once. That gap creates a moral hazard. Operators flying in congested shells pay premiums that have nothing to do with the systemic risk they impose on everyone else in orbit.",
+    "And yet the $1.2 billion space insurance market still prices risk the old way, using historical loss data. Mostly launch and in-orbit failure experience plus single-asset collision probabilities. <i>Nobody is modeling the chance that one debris event sets off a cascade</i>, generating correlated claims across a whole portfolio at once. That gap creates a moral hazard. Operators flying in congested shells pay premiums that have nothing to do with the systemic risk they impose on everyone else in orbit.",
     body_style
 ))
 
@@ -197,7 +197,7 @@ story.append(Paragraph(
 
 story.append(Paragraph("1.3 Contribution", h2_style))
 story.append(Paragraph(
-    "My framework does six things. It couples collision physics with actuarial science so debris growth is driven by actual collision rates, not free parameters. Collision events are drawn from a Poisson distribution, with fragment yields from the NASA Standard Breakup Model. DS and DD collision yields are kept separate to prevent finite-time singularities. Portfolio-level correlated risk is quantified using Gaussian Copula methods. Extreme Value Theory handles tail risk estimation. The model is calibrated against three documented collision events. I also discuss the framework's relevance to international space governance and propose risk-adjusted pricing as an economic instrument for orbital sustainability.",
+    "My framework does six things. It couples collision physics with actuarial science so debris growth is driven by actual collision rates, with no separately tuned cascade-rate parameter. Collision events are drawn from a Poisson distribution, with event-anchored log-normal fragment yields; the NASA Standard Breakup Model serves as an order-of-magnitude anchor. DS and DD collision yields are kept separate, which delays but does not remove the finite-time singularity; the baseline mean-field singularity is at t* = 61 years. Portfolio-level correlated risk is handled by a separate Gaussian-copula module for variance and tail analysis; expected loss itself is correlation-invariant. Extreme Value Theory handles tail risk estimation with a peaks-over-threshold exceedance ratio. The yield scale is checked against three documented collision events, not formally calibrated to them. I also discuss the framework's relevance to international space governance and propose risk-adjusted pricing as an economic instrument for orbital sustainability.",
     body_style
 ))
 
@@ -226,7 +226,7 @@ story.append(Paragraph(
 
 story.append(Paragraph("2.1.2 Fragment Generation", h3_style))
 story.append(Paragraph(
-    "The <i>asymmetric fragment yield</i> between collision types is calibrated to the NASA Standard Breakup Model:",
+    "The <i>asymmetric fragment yield</i> between collision types is an event-anchored prior; the NASA Standard Breakup Model is used only as an order-of-magnitude anchor:",
     body_style
 ))
 frag_data = [
@@ -236,33 +236,33 @@ frag_data = [
 ]
 story.append(make_table(frag_data, [4.5*cm, 4*cm, 2*cm, 5.5*cm]))
 story.append(Paragraph(
-    "Without this distinction, the N<super>2</super> scaling of DD rates combined with high yields (~245) produces a finite-time singularity. Debris populations diverge to unphysical values in short times. The asymmetry reflects the energy differential: a fragment striking an intact satellite releases orders of magnitude more energy than two small fragments colliding.",
+    "Without this distinction, the N<super>2</super> scaling of DD rates combined with high yields (~245) would produce a much earlier finite-time singularity. With it, the baseline mean-field backbone diverges at t* = 61 years, only 11 years beyond the 50-year horizon. The asymmetry reflects the energy differential: a fragment striking an intact satellite releases orders of magnitude more energy than two small fragments colliding.",
     table_note
 ))
 
 story.append(Paragraph("2.1.3 Stochastic Time-Stepping", h3_style))
 story.append(Paragraph(
-    "I model collisions as a Poisson process. I broke time into 0.1-year steps, about 36.5 days each. Within each step, I draw DS and DD collision counts, generate fragments from log-normal distributions, apply orbital decay (<i>λ</i> = 0.005/year with 10% stochastic noise), and update the population. <i>There are no free parameters</i>. Debris growth is entirely determined by collision physics. Each Monte Carlo path uses a distinct random seed for reproducibility.",
+    "I model collisions as a Poisson process. I broke time into 0.1-year steps, about 36.5 days each. Within each step, I draw DS and DD collision counts, generate fragments from log-normal distributions, apply orbital decay (<i>λ</i> = 0.005/year with multiplicative Gaussian noise, standard deviation 10%, clipped below at 0.1), and update the population. <i>There is no separately tuned cascade-rate parameter</i>; the collision terms are fixed by orbital mechanics. That is not the same as \"no free parameters\": initial debris count, yield parameters, the 0.5% benchmark, satellite value, and portfolio size are modelling choices, and their influence is quantified in the limitations. Each Monte Carlo path uses a distinct random seed for reproducibility.",
     body_style
 ))
 
 story.append(Paragraph("2.2 Economic Layer: From Debris to Insurance Premiums", h2_style))
 story.append(Paragraph(
-    "Getting from debris population to financial loss takes four steps. First, I compute per-satellite annual hit probability <i>p</i><sub>hit</sub> = <i>N</i><sub>d</sub> ⋅ <i>σ</i> ⋅ <i>v</i> ⋅ <i>T</i> / <i>V</i>. Second, I calculate per-policy expected loss = <i>p</i><sub>hit</sub> ⋅ <i>V</i><sub>sat</sub> ($50M average). Third, I aggregate across 500 insured satellites with Gaussian Copula correlation (<i>ρ</i> = 0.3). Fourth, I pull out VaR, CVaR, and EVT risk metrics from 1,000 Monte Carlo paths.",
+    "Getting from debris population to financial loss takes four steps. First, I compute per-satellite annual hit probability <i>p</i><sub>hit</sub> = <i>N</i><sub>d</sub> ⋅ <i>σ</i> ⋅ <i>v</i> ⋅ <i>T</i> / <i>V</i>. Second, I calculate per-policy expected loss = <i>p</i><sub>hit</sub> ⋅ <i>V</i><sub>sat</sub> ($50M average). Third, I aggregate the portfolio: expected loss is <i>p</i><sub>hit</sub> ⋅ <i>V</i><sub>sat</sub> ⋅ 500 and is invariant to correlation. A separate Gaussian-copula module (<i>ρ</i> = 0.3) is used for variance and tail analysis, but it does not enter the headline premium. Fourth, I pull out VaR, CVaR, and EVT risk metrics from 1,000 Monte Carlo paths.",
     body_style
 ))
 
-story.append(Paragraph("2.2.1 Solvency II Premium Decomposition", h3_style))
+story.append(Paragraph("2.2.1 Solvency-II-style Premium Decomposition", h3_style))
 story.append(Paragraph(
     "<i>P</i> = E[<i>L</i>] + <i>λ</i><sub>R</sub> ⋅ (CVaR<sub>95</sub> − E[<i>L</i>]) + <i>r</i> ⋅ (VaR<sub>99</sub> − E[<i>L</i>]) + <i>λ</i><sub>E</sub> ⋅ E[<i>L</i>]                                                                                         (2)",
     eq_style
 ))
 story.append(Paragraph(
-    "where <i>λ</i><sub>R</sub> = 1.5 (risk loading multiplier), <i>r</i> = 0.04 (discount rate), <i>λ</i><sub>E</sub> = 0.15 (expense loading). This decomposition follows the European Solvency II Directive (2009/138/EC), the international benchmark for insurance capital adequacy.",
+    "where <i>λ</i><sub>R</sub> = 1.5 (risk loading multiplier), <i>r</i> = 0.04 (discount rate), <i>λ</i><sub>E</sub> = 0.15 (expense loading). This is a Solvency-II-style decomposition, not the calculation prescribed by Directive 2009/138/EC: the Directive applies a 6% cost of capital to the SCR, whereas the risk loading here is a multiple of the CVaR excess and the capital charge uses a 4% cost of capital. The three loadings are pricing assumptions, not regulatory parameters.",
     body_style
 ))
 
-story.append(Paragraph("2.3 Calibration Against Observed Events", h2_style))
+story.append(Paragraph("2.3 Consistency Check Against Observed Events", h2_style))
 cal_data = [
     ['Event', 'Date', 'Fragments (>10cm)', 'Mass'],
     ['Fengyun-1C (ASAT test)', '2007-01-11', '~3,500', '880 kg'],
@@ -271,10 +271,7 @@ cal_data = [
 ]
 story.append(make_table(cal_data, [5.5*cm, 3*cm, 3.5*cm, 4*cm]))
 story.append(Paragraph(
-    "These three events collectively created over 7,300 trackable fragments and anchor the fragment "
-    "yield distributions. Both ASAT tests (Fengyun-1C, Kosmos 1408) and the accidental collision "
-    "(Iridium-Cosmos) are represented, ensuring the model captures both intentional and unintentional "
-    "debris generation mechanisms.",
+    "These three events collectively created about 7,300 catalogued fragments. The counts are catalogue totals rather than per-collision yields, so they are used as an order-of-magnitude consistency check, not to fit the operative log-normal parameters. Both ASAT tests (Fengyun-1C, Kosmos 1408) and the accidental collision (Iridium-Cosmos) are represented, ensuring the model captures both intentional and unintentional debris generation mechanisms.",
     table_note
 ))
 
@@ -283,7 +280,7 @@ val_data = [
     ['Metric', 'Model Value', 'Observed/Market Data', 'Source'],
     ['Tracked debris (>10cm), 2025', '36,500', '36,500', '[11]'],
     ['Global insurance market, 2025', '-', '$1.2B', '[10]'],
-    ['Historical premium rate', '0.5%', '0.5%', '[5]'],
+    ['In-orbit failure benchmark', '0.5%', 'Assumption, not observed premium', 'Model assumption'],
     ['Fengyun-1C fragments', '~3,500', '~3,500', '[4]'],
     ['Iridium-Cosmos fragments', '~2,300', '~2,300', '[4]'],
     ['Kosmos 1408 fragments', '~1,500', '~1,500', '[4]'],
@@ -292,10 +289,10 @@ val_data = [
 story.append(make_table(val_data, [5*cm, 3.5*cm, 3.5*cm, 4*cm]))
 story.append(Paragraph(
     "The model's initial conditions align with current observational data from the ESA Space Environment "
-    "Report 2025 [11]. The calibration events match IADC records and NASA fragmentation data [4]. "
-    "The cascade-adjusted premium of $2,058M/year represents the model's prediction of what insurance pricing "
-    "should reflect if cascade risk were properly accounted for, compared to the current $125M/year historical "
-    "baseline based on industry practice [5].",
+    "Report 2025 [11]. The event counts are order-of-magnitude consistency checks against IADC records and "
+    "NASA fragmentation data [4], not a formal calibration. The cascade-adjusted premium of $2,058M/year "
+    "represents what insurance pricing should reflect if cascade risk were properly accounted for, compared "
+    "with a $125M/year benchmark built from a 0.5% in-orbit failure assumption, not an observed market premium.",
     table_note
 ))
 
@@ -318,7 +315,9 @@ sim_data = [
 story.append(make_table(sim_data, [7*cm, 9*cm]))
 story.append(Paragraph(
     "Debris grows 41x over 50 years under business-as-usual conditions. The 95th percentile path "
-    "reaches 2.24 million objects, representing a 61x increase.",
+    "reaches 2.24 million objects, representing a 61x increase. This is a horizon-specific projection: "
+    "the deterministic mean-field backbone has a finite-time singularity at 61 years, so the 50-year "
+    "point sits at 82% of t*.",
     table_note
 ))
 story.append(Spacer(1, 6))
@@ -326,13 +325,14 @@ story.append(Spacer(1, 6))
 story.append(Paragraph("3.2 Actuarial Risk Metrics", h2_style))
 risk_data = [
     ['Metric', 'Definition', 'Value'],
-    ['Expected Loss (EL)', 'Mean annual portfolio loss', '$921.4M'],
+    ['Expected Loss (EL)', 'Mean worst-year portfolio loss', '$921.4M'],
     ['VaR (95%)', '95th pctile worst-year loss', '$1,365M'],
     ['CVaR (95%) / ES', 'Avg loss beyond VaR(95%)', '$1,565M'],
     ['VaR (99%)', '99th pctile worst-year loss', '$1,721M'],
     ['CVaR (99%) / ES', 'Avg loss beyond VaR(99%)', '$1,854M'],
-    ['EVT VaR (95%)', 'Generalized Pareto estimate', '$1,803M'],
-    ['EVT shape (xi)', 'Tail heaviness indicator', '-0.032'],
+    ['EVT VaR (95%)', 'GPD/POT estimate (zeta=0.10)', '$1,375M'],
+    ['EVT VaR (99%)', 'GPD/POT estimate', '$1,677M'],
+    ['EVT shape (xi)', 'GPD shape (xi<0: bounded)', '-0.032'],
 ]
 story.append(make_table(risk_data, [4*cm, 6*cm, 6*cm]))
 story.append(Spacer(1, 6))
@@ -340,37 +340,46 @@ story.append(Spacer(1, 6))
 story.append(Paragraph("3.3 Premium Decomposition", h2_style))
 prem_data = [
     ['Component', 'Formula', 'Amount'],
-    ['Expected Loss (EL)', 'Mean annual loss', '$921.4M'],
+    ['Expected Loss (EL)', 'Mean worst-year loss', '$921.4M'],
     ['Risk Loading', '1.5 x (CVaR95 - EL)', '$966.0M'],
     ['Capital Charge', '4% x (VaR99 - EL)', '$32.0M'],
     ['Expense Loading', '15% x EL', '$138.2M'],
     ['TOTAL PREMIUM', '', '$2,058M / year'],
     ['Per-policy premium', 'Total / 500 policies', '$4,115,098 / year'],
-    ['Historical premium', '0.5% x $50M x 500', '$125.0M / year'],
-    ['CASCADE FACTOR', 'Cascade / Historical', '16.5x'],
+    ['Historical benchmark', '0.5% x $50M x 500', '$125.0M / year'],
+    ['CASCADE FACTOR', 'Cascade / Benchmark', '16.5x'],
 ]
 story.append(make_table(prem_data, [4.5*cm, 5.5*cm, 6*cm]))
+story.append(Spacer(1, 4))
+story.append(Paragraph(
+    "<b>Time alignment.</b> The premium is computed on the worst-year sample, and in 100% of the 1,000 paths "
+    "the worst year is the final step, so the headline is the fair annual premium at the end of the horizon, "
+    "not today's. The same model gives expected losses of $22.3M at t = 0 (0.18x the static benchmark) and "
+    "$111.0M at t = 25 (0.89x). The 16.5x therefore measures how far a static benchmark falls behind a growing "
+    "cascade by year 50; it is not a claim that current premiums are 16.5x too low today.",
+    table_note
+))
 story.append(Spacer(1, 8))
 
 story.append(Paragraph("3.4 Key Findings", h2_style))
 story.append(Paragraph(
-    "<b>1. Debris grows 41x over 50 years</b> (36,500 to 1.51M). The driver is super-exponential N<super>2</super> feedback in debris-debris collision rates. Liou and Johnson (2008) found the same thing: LEO is already unstable at current population levels.",
+    "<b>1. Debris grows 41x over 50 years</b> (36,500 to 1.51M). The growth is faster than exponential: the mean-field backbone has a finite-time singularity at t* = 61 years, so the 50-year horizon sits at 82% of t*. The qualitative conclusion that LEO is unstable at current population levels is consistent with Liou and Johnson (2008), but no quantitative 41x alignment with their scenario is claimed.",
     body_style
 ))
 story.append(Paragraph(
-    "<b>2. Historical pricing underestimates risk by 16.5x.</b> The cascade-adjusted premium ($2,058M) exceeds historical pricing ($125M) by $1,933M per year. That gap is an unfunded liability in the global space insurance market.",
+    "<b>2. The premium gap grows to 16.5x over the horizon.</b> At year 50 the cascade-adjusted premium ($2,058M) exceeds the 0.5% in-orbit failure benchmark ($125M) by $1,933M per year. That gap combines physics with Solvency-II-style loading; on expected loss alone it is 7.4x. The benchmark is all-peril while the model prices debris collisions only, so the ratio is conservative on coverage. The same model gives $22.3M of expected loss at year 0, which is 0.18x the benchmark, so the gap measures how a static premium falls behind a growing cascade rather than how mispriced today's market is. For a 500-satellite portfolio concentrated in one shell, the year-50 gap exceeds the estimated $1.2B global market, which is a solvency signal rather than a market-wide premium forecast. It is a lower bound on the fair premium because the model uses expected claim counts.",
     body_style
 ))
 story.append(Paragraph(
-    "<b>3. Tail risk is substantial.</b> CVaR(95%) ($1,565M) exceeds expected loss ($921M) by 70%. When I fit a generalized Pareto distribution to the tail, the EVT VaR(95%) comes in at $1,803M, which is 32% above the empirical VaR(95%) of $1,365M. Extreme cascade scenarios produce losses that the Monte Carlo sample by itself would not capture.",
+    "<b>3. Tail risk is substantial but bounded.</b> CVaR(95%) ($1,565M) exceeds expected loss ($921M) by 70%. When I fit a generalized Pareto distribution with the peaks-over-threshold exceedance ratio (zeta = 0.10), EVT VaR(95%) comes in at $1,375M, within 0.7% of the empirical VaR(95%) of $1,365M. EVT VaR(99%) is $1,677M versus an empirical $1,721M. The earlier 32% gap was an artifact of omitting zeta; it is not evidence of an underestimated tail.",
     body_style
 ))
 story.append(Paragraph(
-    "<b>4. Risk loading dominates the premium.</b> The CVaR-based risk loading ($966M) exceeds the expected loss ($921M). This reflects the heavy-tailed nature of cascade losses, a direct consequence of the quadratic feedback mechanism.",
+    "<b>4. Risk loading dominates the premium.</b> The CVaR-based risk loading ($966M) exceeds the expected loss ($921M). This reflects the right-skewed loss distribution and the choice of worst-year loss, not a power-law tail; the fitted GPD shape is negative.",
     body_style
 ))
 story.append(Paragraph(
-    "<b>5. EVT confirms bounded but heavy tail.</b> The GPD shape parameter xi = -0.032 indicates a Type III (bounded) tail. But the large gap between empirical and EVT VaR estimates shows that extreme events remain non-negligible.",
+    "<b>5. EVT indicates a bounded tail.</b> The GPD shape parameter xi = -0.032 indicates a Type III (bounded) tail. Empirical and EVT estimates agree within 3%, so EVT does not show that the Monte Carlo sample underestimates the tail; at 1,000 paths the 99% quantile remains noisy, which is why both estimates are reported.",
     body_style
 ))
 
@@ -379,7 +388,7 @@ story.append(Paragraph("4. Discussion", h1_style))
 
 story.append(Paragraph("4.1 Systemic Risk to the Insurance Market", h2_style))
 story.append(Paragraph(
-    "The $1,933M annual gap between traditional and cascade-adjusted pricing is a <i>systemic insolvency risk</i>. When debris density is high, all satellites face elevated risk at the same time. Claims would be correlated across the entire portfolio. A major cascade event at current premium levels could exceed insurer reserves and propagate losses to reinsurers, potentially destabilizing the global space insurance market. This risk is real. Fengyun-1C in 2007, Iridium-Cosmos in 2009, Kosmos 1408 in 2021. Three events, each creating thousands of trackable fragments, all within the last 18 years.",
+    "The $1,933M annual gap between the benchmark and cascade-adjusted pricing is a <i>solvency concern for concentrated books</i>. When debris density is high, all satellites face elevated risk at the same time. Claims would be correlated across the entire portfolio; the separate copula module shows that correlation widens the tail rather than raising expected loss. A cascade event at static benchmark levels could exceed insurer reserves on a concentrated book and propagate losses to reinsurers. The historical record gives three reference points: Fengyun-1C in 2007, Iridium-Cosmos in 2009, Kosmos 1408 in 2021 - three events, each creating thousands of trackable fragments, all within a 14-year span.",
     body_style
 ))
 
@@ -419,11 +428,21 @@ story.append(Paragraph("4.4 Limitations", h2_style))
 story.append(Paragraph(
     "Several limitations warrant discussion. First, the single-shell approximation (800 km only) does "
     "not capture the full 3D orbital environment with inclination and eccentricity distributions. Second, "
-    "fragment physics are simplified -- the log-normal yield is calibrated to three events, whereas real "
-    "fragmentation depends on collision energy, angle, and material properties. Third, the model does not "
-    "include active debris removal. Fourth, the satellite population is static -- mega-constellation "
-    "deployments and end-of-life deorbiting are not dynamically modeled. Fifth, there is no cross-"
-    "altitude debris migration.",
+    "the model counts only catalogue-scale objects (>10 cm), yet each debris-debris event adds its ~3 "
+    "fragments to that count and both channels share a 10 m2 satellite cross-section. Both choices raise "
+    "the loss: excluding the DD fragments gives EL $462.6M, and a 1 m2 DD section gives $484.1M, so the "
+    "$921.4M headline is an upper bound in this dimension. Third, fragment physics are "
+    "simplified: the log-normal yield is an event-anchored prior, not a formal calibration, and collision "
+    "mass and energy do not enter the sampler. Fourth, the initial condition assigns the entire global "
+    ">10 cm catalogue to the 700-900 km shell; a sensitivity run gives cascade factors of 2.2x at N0 = 8,000 "
+    "and 15.5x at 36,500, so the headline is conditional on that assumption. Fifth, the mean-field backbone "
+    "has a finite-time singularity at t* = 61 years, so the 50-year horizon sits at 82% of t*; one-at-a-time "
+    "parameter changes move t* between 27 and 136 years. Sixth, the loss model uses expected claim counts; "
+    "adding Binomial(500, p_hit) noise raises worst-year EL to $1,242.5M (+35%) and VaR95 to $1,752.5M (+28%), "
+    "so 16.5x is a lower bound in that dimension. Seventh, the 0.5% benchmark is an in-orbit failure "
+    "assumption, not an observed market premium: 0.3% gives 27.5x and 1% gives 8.2x. Eighth, EL is the mean "
+    "worst-year loss, and the model does not include active debris removal, dynamic satellite populations, "
+    "or cross-altitude migration.",
     body_style
 ))
 
@@ -432,19 +451,19 @@ story.append(Paragraph(
     "Future research directions include: (1) multi-shell model with cross-altitude migration; "
     "(2) NORAD TLE data integration for empirical debris tracking; (3) dynamic constellation deployment "
     "modeling; (4) ADR scenario analysis and premium reduction quantification; (5) reinsurance layer "
-    "pricing (excess-of-loss, stop-loss, catastrophe bonds); (6) Sobol global sensitivity analysis to "
-    "identify the most impactful parameters.",
+    "pricing (excess-of-loss, stop-loss, catastrophe bonds); (6) variance-based global sensitivity analysis "
+    "with a low-discrepancy Saltelli design, since the current tornado chart is one-at-a-time.",
     body_style
 ))
 
 # ===== 5. CONCLUSION ==================================================
 story.append(Paragraph("5. Conclusion", h1_style))
 story.append(Paragraph(
-    "This framework shows that incorporating physics-based cascade dynamics into insurance pricing reveals <i>16.5x underpricing</i> of LEO satellite risk. The main innovation is replacing ad-hoc cascade parameters with first-principles collision physics. Debris growth is driven by actual collision rates, with fragment yields calibrated to real events and asymmetric treatment of debris-satellite versus debris-debris collisions.",
+    "This framework shows that incorporating physics-based cascade dynamics into insurance pricing produces a <i>16.5x gap</i> relative to a 0.5% in-orbit failure benchmark (7.4x on expected loss alone). The main innovation is replacing ad-hoc cascade parameters with first-principles collision physics. Debris growth is driven by actual collision rates, with event-anchored fragment yields and asymmetric treatment of debris-satellite versus debris-debris collisions.",
     body_style
 ))
 story.append(Paragraph(
-    "The $1,933M annual pricing gap is a systemic risk to the global space insurance market, but it is also an opportunity. Risk-adjusted pricing can work as an economic instrument for orbital sustainability, going along with the regulatory framework of the UN Space 2030 Agenda. By aligning private insurance costs with systemic debris risk, this framework gives us a market-based pathway toward long-term sustainability of outer space activities.",
+    "The $1,933M annual pricing gap is a systemic risk to the global space insurance market, but it is also an opportunity. Risk-adjusted pricing can work as an economic instrument for orbital sustainability, going along with the regulatory framework of the UN Space 2030 Agenda. By aligning private insurance costs with systemic debris risk, this framework gives us a market-based pathway toward long-term sustainability of outer space activities. These numbers are conditional: the entire >10 cm catalogue is assigned to the 700-900 km shell, claim counts are treated as expected values, and the mean-field backbone is 11 years from a finite-time singularity. The 16.5x should be read with those boundaries, which are quantified in the limitations.",
     body_style
 ))
 
@@ -474,7 +493,8 @@ story.append(Spacer(1, 14))
 story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#cccccc'),
                          spaceBefore=4, spaceAfter=8))
 story.append(Paragraph(
-    "<b>Data and Code Availability:</b> The framework methodology is released under CC BY 4.0. "
+    "<b>Data and Code Availability:</b> The simulation code is released under the Apache License 2.0 "
+    "(see LICENSE); the manuscript text is distributed under CC BY 4.0. "
     "Source code (Python package <i>cascade_risk/</i>), configuration files, and simulation "
     "output data are available from the author upon request.",
     ParagraphStyle('DataAvail', parent=body_style, fontSize=9)

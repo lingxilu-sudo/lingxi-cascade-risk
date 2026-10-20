@@ -184,11 +184,11 @@
     </div>
     <div class="summary-col">
       <h3>Method</h3>
-      <p>Physics-based Monte Carlo simulation (1,000 paths, 50 years) coupled with Solvency II premium decomposition. Calibrated against three documented collision events.</p>
+      <p>Physics-based Monte Carlo simulation (1,000 paths, 50 years) coupled with a Solvency-II-style premium decomposition. Fragment yields anchored to three documented collision events.</p>
     </div>
     <div class="summary-col">
       <h3>Key Finding</h3>
-      <p>Cascade-adjusted premiums are 16.5&times; higher than current market rates ($2,058M vs $125M per year for 500 satellites). That $1,933M gap is an unfunded liability.</p>
+      <p>By year 50 of the horizon, cascade-adjusted premiums reach 16.5&times; a static 0.5%-of-hull benchmark ($2,058M vs $125M per year for 500 satellites). At year 0 the same model's expected loss is 0.18&times; the benchmark, so the gap measures how fast a premium that never updates falls behind a growing cascade &mdash; not today's mispricing.</p>
     </div>
   </div>
 </section>
@@ -221,21 +221,24 @@
         self-sustaining: each impact generates more debris than natural decay removes,
         leading to exponential growth. In the worst case, entire orbital shells become
         unusable &mdash; a scenario sometimes called "cascading collisional breakup."
+        In this model the production term dominates decay at every population
+        (b &gt; &lambda;), so there is no stable equilibrium: the finite-time singularity
+        at t* &asymp; 61 years plays the role of the threshold.
       </p>
     </div>
 
     <p>
       This framework presents the first quantitative model that couples physics-based
-      cascade simulation with actuarial pricing. The result: insurance premiums that are
-      <strong>16.5 times higher</strong> than current market rates &mdash; a gap that
-      represents both a systemic risk to insurers and a market failure in orbital
-      sustainability.
+      cascade simulation with actuarial pricing. The result: by the end of the 50-year
+      horizon, the fair annual premium is <strong>16.5 times</strong> today's static
+      0.5%-of-hull benchmark &mdash; a gap that measures how fast a static premium falls
+      behind a growing cascade, not how mispriced today's market is.
     </p>
 
     <div class="info-box gold">
       <div class="ib-label">Why This Matters</div>
       <p>
-        If insurers underprice risk by 16.5&times;, operators have no economic incentive to
+        If premiums never reflect cascade risk, operators have no economic incentive to
         choose less congested orbits or invest in debris mitigation. Correct pricing
         aligns private costs with systemic risks &mdash; making sustainability a market
         force rather than a regulatory burden.
@@ -288,9 +291,9 @@
       <p>
         Debris&ndash;debris collision rate scales with N<sub>d</sub>&sup2; &mdash; doubling
         the debris <em>quadruples</em> the collision rate. Each collision produces new
-        fragments (calibrated to the NASA Standard Breakup Model), which further
-        accelerate collisions. This is the mathematical root of the cascade: a
-        self-reinforcing loop with no natural brake.
+        fragments (anchored to the NASA Standard Breakup Model as an order-of-magnitude
+        check), which further accelerate collisions. This is the mathematical root of the
+        cascade: a self-reinforcing loop that decay alone cannot arrest at these rates.
       </p>
     </div>
   </section>
@@ -410,7 +413,7 @@
       </p>
       <p>
         <strong>Step 3:</strong> From the loss distribution across 1,000 Monte Carlo paths,
-        extract risk metrics (VaR, CVaR, EVT) and price using the Solvency II framework.
+        extract risk metrics (VaR, CVaR, EVT) and price using a Solvency-II-style framework.
       </p>
     </div>
 
@@ -427,8 +430,8 @@
     </div>
 
     <div class="card">
-      <h3>Premium Decomposition (Solvency II)</h3>
-      <p>European insurance rules say premiums need to cover four things:</p>
+      <h3>Premium Decomposition (Solvency-II-style)</h3>
+      <p>This stylised pricing model splits the premium into four parts &mdash; it is not the calculation prescribed by the Solvency II Directive:</p>
       <table class="data-table">
         <thead><tr><th>Component</th><th>Description</th><th class="num">Amount</th></tr></thead>
         <tbody>
@@ -441,8 +444,8 @@
       </table>
       <p>
         The risk loading ($966M) is the biggest piece &mdash; bigger than the expected
-        loss itself. That's because the tail is brutal: in the worst 5% of scenarios,
-        you're looking at average losses of $1,565M, almost twice the mean.
+        loss itself. That's because the tail is heavy: in the worst 5% of scenarios,
+        average losses are $1,565M, 70% above the mean.
       </p>
     </div>
 
@@ -455,15 +458,16 @@
           <tr><td>CVaR&#8329;&#8325; (ES)</td><td>Expected shortfall beyond VaR&#8329;&#8325;</td><td class="num">$1,565M</td></tr>
           <tr><td>VaR&#8329;&#8329;</td><td>99th percentile of worst-year loss</td><td class="num">$1,721M</td></tr>
           <tr><td>CVaR&#8329;&#8329; (ES)</td><td>Expected shortfall beyond VaR&#8329;&#8329;</td><td class="num">$1,854M</td></tr>
-          <tr><td>EVT VaR&#8329;&#8325;</td><td>Generalized Pareto tail estimate</td><td class="num">$1,803M</td></tr>
+          <tr><td>EVT VaR&#8329;&#8325;</td><td>Generalized Pareto tail estimate (&zeta; = 0.10)</td><td class="num">$1,375M</td></tr>
           <tr><td>EVT shape (&xi;)</td><td>Heavy-tail indicator (&xi;&lt;0 &rarr; bounded)</td><td class="num">&minus;0.032</td></tr>
         </tbody>
       </table>
       <p>
         The EVT shape parameter &xi; = &minus;0.032 indicates a slightly bounded tail
-        (Type III), but the EVT VaR&#8329;&#8325; of $1,803M &mdash; well above the empirical
-        VaR&#8329;&#8325; of $1,365M &mdash; confirms that tail events are substantially more
-        severe than the Monte Carlo sample alone would suggest.
+        (Type III). Fitted above the 90th percentile with the exceedance ratio &zeta; = 0.10
+        included, the GPD estimate of VaR&#8329;&#8325; is $1,375M &mdash; only 0.7% above the
+        empirical $1,365M &mdash; and VaR&#8329;&#8329; is $1,677M, 2.5% below the empirical
+        $1,721M. EVT therefore corroborates the empirical tail rather than extending it.
       </p>
     </div>
   </section>
@@ -479,12 +483,12 @@
       <div class="compare-card old">
         <div class="cc-tag">Traditional Pricing</div>
         <div class="cc-val">$125M</div>
-        <div class="cc-desc">Based on 0.5% historical in-orbit failure rate. No cascade risk modeled. This is what insurers charge today.</div>
+        <div class="cc-desc">A 0.5% in-orbit failure benchmark (an assumption, not an observed market price). No cascade risk modeled.</div>
       </div>
       <div class="compare-card new">
-        <div class="cc-tag">Cascade-Adjusted</div>
+        <div class="cc-tag">Cascade-Adjusted, Year 50</div>
         <div class="cc-val">$2,058M</div>
-        <div class="cc-desc">Physics-driven model with collision feedback, EVT tail risk, and Solvency II capital structure.</div>
+        <div class="cc-desc">Physics-driven model with collision feedback and a Solvency-II-style capital structure; EVT is a diagnostic cross-check.</div>
       </div>
     </div>
 
@@ -510,11 +514,11 @@
     <div class="info-box red">
       <div class="ib-label">Systemic Risk Warning</div>
       <p>
-        That $1,933M gap between what insurers charge ($125M) and what they should charge
-        ($2,058M) isn't just a number. It's an unfunded liability waiting to happen.
-        If a big cascade event hits while the market is priced at historical rates,
-        the claims could blow past insurer reserves and trigger
-        <strong>systemic insolvency</strong> across the whole space insurance sector.
+        The $1,933M gap between the static benchmark ($125M) and the model's fair premium
+        at year 50 ($2,058M) is measured at the end of the horizon, not today. It shows
+        what happens if a premium never updates while the debris population grows: at year
+        0 the model's own expected loss is only 0.18&times; the benchmark. Read as a
+        concentrated-book solvency signal, not a market-wide forecast.
       </p>
     </div>
 
@@ -541,14 +545,17 @@
       <h3>Simulation Architecture</h3>
       <p><strong>Step 1 &mdash; Collision-driven growth.</strong> Debris evolution is governed by
       Poisson-distributed collision events at each time step (&Delta;t = 0.1 yr). Fragment
-      yields follow log-normal distributions calibrated to observed events. No free cascade
-      parameters.</p>
+      yields follow log-normal distributions anchored to observed events. There is no
+      separately tuned cascade-rate parameter; the initial population, yields, benchmark
+      and portfolio size remain modelling choices and are reported as such.</p>
       <p><strong>Step 2 &mdash; Monte Carlo ensemble.</strong> 1,000 independent 50-year paths
       produce a full probability distribution of debris trajectories and corresponding losses.</p>
       <p><strong>Step 3 &mdash; Risk quantification.</strong> VaR, CVaR, and EVT (Generalized
-      Pareto Distribution) metrics are extracted from the max-annual-loss distribution.</p>
-      <p><strong>Step 4 &mdash; Premium calculation.</strong> Solvency II decomposition with
-      Gaussian Copula correlation-adjusted portfolio losses.</p>
+      Pareto Distribution, with the exceedance ratio &zeta;) are extracted from the
+      worst-year loss distribution; EVT is a diagnostic cross-check.</p>
+      <p><strong>Step 4 &mdash; Premium calculation.</strong> Solvency-II-style decomposition on the
+      worst-year loss sample. A separate Gaussian-copula module analyzes portfolio
+      correlation; it is not used in the headline premium.</p>
     </div>
 
     <div class="card">
@@ -566,12 +573,32 @@
       </p>
       <p>
         <strong>No active debris removal.</strong> The model does not include ADR missions,
-        which could shift the debris trajectory below the cascade threshold.
+        which would slow the debris growth.
       </p>
       <p>
-        <strong>Simplified fragment physics.</strong> The NASA Standard Breakup Model provides
-        fragment counts but not directional distributions or size&ndash;velocity correlations
-        that would affect collision probabilities.
+        <strong>Simplified fragment physics.</strong> The operative fragment yield is an
+        event-anchored log-normal prior, not a formal calibration. Collision mass and energy
+        do not enter the sampler, and the NASA Standard Breakup Model is used only as an
+        order-of-magnitude anchor.
+      </p>
+      <p>
+        <strong>Catalogue-scale count with a generous debris&ndash;debris term.</strong> The model
+        tracks objects larger than 10 cm but adds the ~3 fragments from each debris&ndash;debris
+        event to that same count, and both channels share the 10 m&sup2; satellite
+        cross-section. Excluding those fragments lowers N(50) from 1.51M to 758,000 and the
+        expected loss from $921.4M to $462.6M; a 1 m&sup2; debris&ndash;debris section gives
+        793,000 and $484.1M. The 16.5&times; is therefore an upper bound in this dimension.
+      </p>
+      <p>
+        <strong>Finite-time singularity.</strong> The deterministic backbone diverges at
+        t* &asymp; 61 years, only 11 years beyond the horizon, so the 41&times; growth is a
+        horizon-specific projection rather than a stable long-run rate.
+      </p>
+      <p>
+        <strong>Benchmark and timing.</strong> The 0.5% in-orbit failure rate is an
+        assumption; at 1% the multiple is 8.2&times;, at 0.3% it is 27.5&times;. The sample is
+        each path's worst year (the final step in 100% of paths), so the headline is the
+        year-50 fair premium, not today's.
       </p>
     </div>
 
@@ -649,6 +676,9 @@ function drawSim(){
 
 function simStep(){
   if(!simRunning)return;
+  // Numerical guard: the browser loop is per-event, so a runaway path would
+  // freeze the tab. Stop at the same saturation scale the Python model uses.
+  if(sim.debris>2e7){simRunning=false;return;}
   const dt=.1,Nd=sim.debris,Ns=8000,sig=10e-6,v=10,T=31557600,V=1.292e11;
   const Rds=Nd*Ns*sig*v*T/V,Rdd=.5*Nd*(Nd-1)*sig*v*T/V;
   const nds=poi(Rds*dt),ndd=poi(Rdd*dt);

@@ -1,6 +1,6 @@
 # Copyright 2026 Lingxi Lu. All rights reserved.
 # Licensed under the Apache License, Version 2.0.
-# The Lingxi Cascade Risk Framework.
+# Cascade Risk Framework.
 
 """
 Main Entry Point: Cascade Risk Framework
@@ -120,9 +120,9 @@ def run_pipeline(config: Config, output_dir: Path, n_paths_override: int = None)
 
     # --- Model Parameters ---
     print("[1/6] Loading model parameters...")
-    print(f"  k_debris: mu={config.physics.k_debris_mu:.2f}, sigma={config.physics.k_debris_sigma:.2f} (NASA Standard Breakup Model)")
+    print(f"  k_debris: mu={config.physics.k_debris_mu:.2f}, sigma={config.physics.k_debris_sigma:.2f} (event-anchored log-normal yield; NASA formula used only as an order-of-magnitude anchor)")
     print(f"  Shell: {models['shell']}")
-    print(f"  K (carrying capacity): {models['shell'].carrying_capacity(p.cross_section_large_m2, p.relative_velocity_km_s):.0f}")
+    print(f"  K (Kessler criterion V/(sigma*v*tau), excludes fragment yield; diagnostic only): {models['shell'].carrying_capacity(p.cross_section_large_m2, p.relative_velocity_km_s, p.decay_rate_per_year):,.0f}")
 
     # --- Monte Carlo Simulation ---
     print(f"\n[2/6] Running Monte Carlo simulation ({n_paths} paths, {p.t_max_years} years)...")
@@ -153,10 +153,10 @@ def run_pipeline(config: Config, output_dir: Path, n_paths_override: int = None)
     print("\n[3/6] Computing loss distribution...")
     loss_dist = models["loss_model"].compute_loss_distribution(
         all_n_debris=result.all_n_debris,
-        n_debris_0=p.n_debris_large,
         cross_section_m2=p.cross_section_large_m2,
         v_rel_km_s=p.relative_velocity_km_s,
         shell_volume_km3=models["shell"].volume_km3,
+        dt_years=p.dt_years,
     )
 
     # --- Risk Metrics ---
@@ -201,7 +201,7 @@ def run_pipeline(config: Config, output_dir: Path, n_paths_override: int = None)
         print(f"  EVT VaR 99%:           ${metrics.evt_var_99 / 1e6:.2f}M")
         print(f"  EVT shape (xi):        {metrics.evt_shape_parameter:.3f}")
     print()
-    print("INSURANCE PREMIUM (Solvency II Framework):")
+    print("INSURANCE PREMIUM (Solvency-II-style decomposition):")
     print(f"  Expected Loss (EL):    ${premium.expected_loss / 1e6:.2f}M")
     print(f"  Risk Loading:          ${premium.risk_loading / 1e6:.2f}M")
     print(f"  Capital Charge:        ${premium.capital_charge / 1e6:.2f}M")
@@ -265,9 +265,10 @@ def main():
         from dataclasses import replace
         config = replace(config, physics=replace(config.physics, t_max_years=args.years))
 
-    # Output directory
-    output_dir = Path(args.output) if args.output else Path(__file__).parent / "output"
-    output_dir.mkdir(exist_ok=True)
+    # Output directory: relative to the working directory so the installed
+    # console script does not try to write inside site-packages.
+    output_dir = Path(args.output) if args.output else Path.cwd() / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     run_pipeline(config, output_dir, n_paths_override=args.paths)
 

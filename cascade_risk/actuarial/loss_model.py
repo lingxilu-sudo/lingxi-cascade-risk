@@ -72,7 +72,6 @@ class LossModel:
     def compute_hit_probability(
         self,
         n_debris: np.ndarray,
-        n_debris_0: float,
         cross_section_m2: float = 10.0,
         v_rel_km_s: float = 10.0,
         shell_volume_km3: float = 1.0,
@@ -88,8 +87,6 @@ class LossModel:
         ----------
         n_debris : np.ndarray
             Debris population (scalar or array).
-        n_debris_0 : float
-            Reference debris population for scaling.
         cross_section_m2 : float
             Satellite collision cross-section (m²).
         v_rel_km_s : float
@@ -116,10 +113,10 @@ class LossModel:
     def compute_loss_distribution(
         self,
         all_n_debris: np.ndarray,
-        n_debris_0: float,
         cross_section_m2: float = 10.0,
         v_rel_km_s: float = 10.0,
         shell_volume_km3: float = 1.0,
+        dt_years: float = 1.0,
     ) -> LossDistribution:
         """
         Full loss distribution computation from Monte Carlo debris paths.
@@ -128,14 +125,15 @@ class LossModel:
         ----------
         all_n_debris : np.ndarray
             (n_paths, n_steps) debris population array.
-        n_debris_0 : float
-            Initial/reference debris count.
         cross_section_m2 : float
             Satellite cross-section (m²).
         v_rel_km_s : float
             Relative velocity (km/s).
         shell_volume_km3 : float
             Shell volume (km³).
+        dt_years : float
+            Time step of the trajectory (years). Used to convert step
+            index to calendar time when discounting.
 
         Returns
         -------
@@ -146,7 +144,7 @@ class LossModel:
 
         # Per-satellite hit probability
         hit_prob = self.compute_hit_probability(
-            all_n_debris, n_debris_0,
+            all_n_debris,
             cross_section_m2, v_rel_km_s, shell_volume_km3
         )
 
@@ -161,15 +159,19 @@ class LossModel:
         # Maximum annual loss per path
         max_annual_losses = np.max(portfolio_annual_losses, axis=1)
 
-        # Aggregate (NPV) loss per path
+        # Aggregate (NPV) loss per path.  Step index t is converted to
+        # calendar years; using the raw index silently discounts 500 steps
+        # as if they were 500 years.  annual_losses is a rate per year, so
+        # the rectangle-rule integral over the horizon needs a dt factor;
+        # otherwise 501 steps of 0.1 year are counted as 501 full years.
         discount_factors = np.array([
-            1.0 / (1.0 + self.discount_rate) ** t
+            1.0 / (1.0 + self.discount_rate) ** (t * dt_years)
             for t in range(n_steps)
         ])
         aggregate_losses = np.sum(
             portfolio_annual_losses * discount_factors[np.newaxis, :],
             axis=1
-        )
+        ) * dt_years
 
         return LossDistribution(
             annual_losses=portfolio_annual_losses,

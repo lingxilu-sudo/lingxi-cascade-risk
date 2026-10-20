@@ -29,7 +29,7 @@ class SimulationResult:
     """Container for Monte Carlo simulation results."""
     times: np.ndarray                          # (n_steps,)
     all_n_debris: np.ndarray                   # (n_paths, n_steps)
-    all_n_collisions: np.ndarray               # (n_paths, n_steps)
+    all_n_collisions: np.ndarray               # (n_paths, n_steps), cumulative
     n_paths: int
     t_max_years: float
     dt_years: float
@@ -86,7 +86,7 @@ class CascadeSimulator:
         n_debris_0: float,
         n_paths: int = 1000,
         t_max_years: float = 50.0,
-        dt_years: float = 0.01,
+        dt_years: float = 0.1,
         decay_uncertainty: float = 0.1,
         seed: int = 42,
         progress_callback: Optional[callable] = None,

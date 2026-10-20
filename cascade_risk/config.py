@@ -10,7 +10,7 @@ a unified Config object with validated, typed access.
 
 from __future__ import annotations
 
-import os
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -51,7 +51,7 @@ class PhysicsConfig:
     decay_rate_per_year: float = 0.005
     decay_rate_uncertainty: float = 0.1
     t_max_years: float = 50.0
-    dt_years: float = 0.01
+    dt_years: float = 0.1
     n_monte_carlo_paths: int = 1000
     random_seed: int = 42
 
@@ -77,20 +77,55 @@ class Config:
 
     @classmethod
     def from_yaml(cls, baseline: str = "baseline.yaml") -> "Config":
-        """Create Config from YAML files."""
-        data = _load_yaml(baseline)
+        """Create Config from YAML files.
+
+        Unknown keys raise instead of being silently ignored: a typo such as
+        ``shell_thicknes_km`` would otherwise fall back to the dataclass
+        default and change the simulation without any warning.
+
+        If ``baseline.yaml`` itself is missing — the normal case for a
+        pip-installed package that does not ship the repository's ``configs/``
+        directory — the built-in dataclass defaults are used with a warning.
+        Those defaults are identical to ``baseline.yaml`` (pinned by a test),
+        so the published numbers stay reproducible.
+        """
+        try:
+            data = _load_yaml(baseline) or {}
+        except FileNotFoundError:
+            if baseline != "baseline.yaml":
+                raise
+            warnings.warn(
+                "configs/baseline.yaml not found (installed package without "
+                "the repository's configs/ directory); using the built-in "
+                "defaults, which are identical to that file.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            return cls()
+
+        # Guard the top level as well: a misspelled section name
+        # ("physic:" instead of "physics:") would otherwise be dropped and
+        # every physics parameter would silently fall back to its default.
+        unknown_sections = set(data) - {"physics", "economics"}
+        if unknown_sections:
+            raise ValueError(
+                f"Unknown config sections in {baseline}: "
+                f"{sorted(unknown_sections)}"
+            )
 
         phys_data = data.get("physics", {})
         econ_data = data.get("economics", {})
 
-        physics = PhysicsConfig(**{
-            k: v for k, v in phys_data.items()
-            if k in PhysicsConfig.__dataclass_fields__
-        })
-        economics = EconomicsConfig(**{
-            k: v for k, v in econ_data.items()
-            if k in EconomicsConfig.__dataclass_fields__
-        })
+        unknown_phys = set(phys_data) - set(PhysicsConfig.__dataclass_fields__)
+        unknown_econ = set(econ_data) - set(EconomicsConfig.__dataclass_fields__)
+        if unknown_phys or unknown_econ:
+            raise ValueError(
+                f"Unknown config keys in {baseline}: "
+                f"physics={sorted(unknown_phys)}, economics={sorted(unknown_econ)}"
+            )
+
+        physics = PhysicsConfig(**phys_data)
+        economics = EconomicsConfig(**econ_data)
 
         return cls(physics=physics, economics=economics)
 

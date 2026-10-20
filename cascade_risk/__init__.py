@@ -3,14 +3,15 @@ Cascade Risk Framework
 ===============================
 A physics-based Monte Carlo model for space debris insurance pricing.
 
-This is the first framework that couples orbital mechanics-driven debris
-cascade simulation with actuarial risk metrics (VaR, CVaR, EVT) to produce
-risk-adjusted insurance premiums for satellite operations.
+This framework couples orbital mechanics-driven debris cascade simulation
+with actuarial risk metrics (VaR, CVaR, EVT) to produce risk-adjusted
+insurance premiums for satellite operations. EVT is used as a diagnostic
+cross-check; the premium uses empirical CVaR and VaR.
 
 Modules:
     physics     - Orbital mechanics, collision models, debris cascade simulation
     actuarial   - Loss distributions, risk metrics, premium pricing
-    calibration - Historical event calibration (Iridium-Cosmos, Fengyun-1C)
+    calibration - Historical event anchors (Iridium-Cosmos, Fengyun-1C)
     analysis    - Sensitivity analysis (OAT, Sobol)
     utils       - Physical constants, unit conversions
 """

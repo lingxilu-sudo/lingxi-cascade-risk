@@ -114,15 +114,19 @@ class OrbitalShell:
     # ------------------------------------------------------------------
 
     def carrying_capacity(
-        self, cross_section_m2: float, v_rel_km_s: float
+        self,
+        cross_section_m2: float,
+        v_rel_km_s: float,
+        decay_rate_per_year: float = 0.005,
     ) -> float:
         """
-        Critical debris population above which cascade becomes
-        self-sustaining (Kessler 1978).
+        Characteristic debris scale at which the debris-debris collision
+        rate equals the decay rate, K = V_shell / (σ × v_rel × τ_decay).
 
-        K = V_shell / (σ × v_rel × τ_decay)
-
-        where τ_decay = 1/λ is the characteristic decay time.
+        This is **not** a tipping point: it ignores the fragment yield and
+        the debris-satellite production term.  With the baseline b > λ the
+        full mean field dN/dt = (b-λ)N + aN² has no positive equilibrium,
+        so K (and the DD-only threshold λ/a) are diagnostics only.
 
         Parameters
         ----------
@@ -130,10 +134,15 @@ class OrbitalShell:
             Characteristic collision cross-section (m²).
         v_rel_km_s : float
             Mean relative velocity (km/s).
+        decay_rate_per_year : float
+            Orbital decay rate (1/year). Must match the value used by the
+            growth model; hard-coding it silently disconnects K from the
+            simulated decay.
         """
+        if decay_rate_per_year <= 0:
+            raise ValueError("decay_rate_per_year must be positive")
         sigma_km2 = cross_section_m2 * 1e-6
-        # Characteristic decay time ~200 years at 800 km
-        tau_decay_years = 1.0 / 0.005
+        tau_decay_years = 1.0 / decay_rate_per_year
         tau_decay_s = tau_decay_years * 31557600.0
 
         # K = V / (σ × v_rel × τ)
@@ -141,8 +150,11 @@ class OrbitalShell:
         return self.volume_km3 / (sigma_km2 * v_rel_km_s * tau_decay_s)
 
     def __repr__(self) -> str:
+        # Keep this ASCII: it is printed by main.py and a superscript
+        # character raises UnicodeEncodeError on a stock Windows (GBK)
+        # console.
         return (
             f"OrbitalShell(altitude={self.altitude_km} km, "
             f"thickness={self.thickness_km} km, "
-            f"V={self.volume_km3:.2e} km³)"
+            f"V={self.volume_km3:.2e} km^3)"
         )
