@@ -14,7 +14,7 @@ python study/audit_probe.py        # A–N 节，EVT/聚合/配置/时点/单调
 python study/audit_n0.py           # N0 敏感性（300 路径）
 python study/audit_convergence.py  # 路径数与 dt 收敛（300/1000/2000）
 python study/verify_baseline.py    # 基线数字快照
-python -m pytest tests/ -q         # 40 passed
+python -m pytest tests/ -q         # 43 passed
 ```
 
 基线（1,000 路径，seed 42，dt=0.1）：EL $921.4M、VaR95 $1,365.1M、CVaR95 $1,565.4M、
@@ -129,7 +129,7 @@ VaR99 $1,720.8M、保费 $2,057.5M、每保单 $4,115,098、倍数 16.46×。
 6. **路径收敛**：EL 925.0/921.4/921.6（300/1000/2000）；VaR95 1,354.9/1,365.1/1,364.9。
 7. **dt 收敛**：EL 896.5/925.0/913.0（0.2/0.1/0.05），VaR95 差 <0.2%。
 8. **配置解析**：合法 YAML 往返一致，未知键报错；`Config` 的默认值与 `baseline.yaml` 一致。
-9. **测试**：`pytest` 40 passed（含碰撞率、壳层几何、保费分解、copula、EVT ζ、聚合贴现/dt、Sobol 解析、ASCII repr、分散化比率、配置校验、饱和保护）。
+9. **测试**：`pytest` 43 passed（含碰撞率、壳层几何、保费分解、copula、EVT ζ、聚合贴现/dt、Sobol 解析、ASCII repr、分散化比率、配置校验、饱和保护）。
 
 ---
 
@@ -173,7 +173,7 @@ VaR99 $1,720.8M、保费 $2,057.5M、每保单 $4,115,098、倍数 16.46×。
 | P2-9 | 保费图的"90% confidence band"是零宽度 | `prem_time` 是逐点分位数复合，不是路径样本；p5/median/p95 三条曲线完全相同。删除 band 与图例；"Historical Pricing"改为"Static 0.5% benchmark (assumption)" |
 | P2-10 | DD 产额 1.1/0.5 硬编码在三处 | 提升为 `constants.DD_FRAGMENT_MU/SIGMA`，`debris_growth.py`（两处）与 `visualization.py` 共用 |
 | P2-11 | `collision_model.py` 模块 docstring 仍称碎片 "drawn from the NASA Standard Breakup Model" | 改为 event-anchored log-normal，NASA 仅作量级锚 |
-| P2-12 | P0-1/P0-2/P0-5 没有回归测试 | 新增 EVT ζ、聚合贴现/dt、K 随衰减率变化、Sobol 解析、repr ASCII 五类测试；另加分散化比率、配置校验、饱和保护测试；`pytest` 40 passed |
+| P2-12 | P0-1/P0-2/P0-5 没有回归测试 | 新增 EVT ζ、聚合贴现/dt、K 随衰减率变化、Sobol 解析、repr ASCII 五类测试；另加分散化比率、配置校验、饱和保护测试；`pytest` 43 passed |
 | P2-13 | 组合模块把"路径不确定性"压成一条平均命中率 | `simulate_portfolio_losses` 只接收每步**跨路径均值** `mean_hit_prob`，再在其上抽样；因此已命中路径数在步与步之间不是由同一批路径演化而来，分散化比率只是近似 | docstring 明写该局限；不改变头条数字（该模块不进入定价链） |
 | P2-14 | `carrying_capacity()` docstring 仍称"cascade becomes self-sustaining" | 与 P1-18 的 CLI/讲义口径矛盾，代码里还留着旧叙事 | docstring 改为"characteristic scale, not a tipping point"，并注明 \(b>\lambda\) 时无正平衡点 |
 | P2-15 | `LossModel` 的 `n_debris_0` 参数完全未使用 | `compute_hit_probability` 只用密度 \(n\sigma vT/V\)，不按参考数缩放；docstring 却写 "Reference debris population for scaling" | docstring 标注"kept for API compatibility; not used" |
@@ -205,7 +205,7 @@ VaR99 $1,720.8M、保费 $2,057.5M、每保单 $4,115,098、倍数 16.46×。
 | `cascade_risk/calibration/historical_events.py` | 明确 `calibrate_k_debris` 只是每 kg 诊断，不回填抽样参数 |
 | `cascade_risk/utils/constants.py` | 新增 `DD_FRAGMENT_MU/SIGMA` |
 | `cascade_risk/config.py` | 未知键与未知 section 报错；缺少默认 baseline 时告警并回落到逐字段相同的默认值 |
-| `tests/` | 新增 EVT ζ、聚合贴现/dt、K 衰减、Sobol 解析、ASCII repr、分散化比率、配置校验、饱和保护；40 passed |
+| `tests/` | 新增 EVT ζ、聚合贴现/dt、K 衰减、Sobol 解析、ASCII repr、分散化比率、配置校验、饱和保护、shell_volume required、simulate_path 饱和保护；43 passed |
 | `main.py` | 传 decay/dt；打印口径说明；K 标注为诊断量 |
 | `paper/framework_paper.md` | 摘要、1.3、2.1–2.3、3.2–3.4、4.1–4.5 全面改写 |
 | `gen_paper_pdf.py` | 同上（另一份口语版手稿） |
@@ -244,11 +244,30 @@ VaR99 $1,720.8M、保费 $2,057.5M、每保单 $4,115,098、倍数 16.46×。
 | P2-22 | `main.py --output a/b/c` 因缺 `parents` 失败；安装后默认会写进 site-packages/output | `mkdir(parents=True)`；默认输出改为 `Path.cwd()/output` |
 | P2-23 | 0004 把 EL 说成"半数以上年份不超过 921M 附近"（把均值当成了中位数） | 表中补中位数 \$872.6M；正文改为"EL 是均值，比中位数高 5.6%，偏度 1.11" |
 
-### 8.3 本轮复核结论
+### 8.3 第四轮追加审计（同日）
+
+#### 8.3.1 新增缺陷与口径问题（已修）
+
+| # | 问题 | 证据 | 修正 |
+|---|---|---|---|
+| P1-25 | 论文摘要/结论/§3.3、PDF/DOCX 生成器、README、op-ed、SGAC 提案、study 讲义均写"implements/decomposes according to the Solvency II Directive"，暗示合规 | 论文摘要 L12 "implements the Solvency II premium decomposition"；结论 L256 "according to the Solvency II regulatory framework"；§3.3 标题 "Solvency II Decomposition"；中文讲义 0005 L7 "要求保险公司按…思路给风险定价"（错：指令规定资本要求，不规定保费公式） | 全部改为 "Solvency-II-style"；论文结论加括号注明"6% cost-of-capital calculation of Directive 2009/138/EC is not reproduced"；0005 改写为"指令规定资本要求，不是保费公式；本框架只借用四项分解的写法，系数是定价假设"；configs/baseline.yaml 注释同步 |
+
+#### 8.3.2 新增卫生问题（已修）
+
+| # | 问题 | 证据 | 修正 |
+|---|---|---|---|
+| P2-24 | `compute_hit_probability` 与 `compute_loss_distribution` 的 `shell_volume_km3` 默认 1.0 km³ 是 10¹¹ 倍的陷阱 | 默认值 1.0 km³ 使命中率被裁剪到 1.0，损失变成 \$25B（上限）；所有调用方都显式传了 shell.volume_km3，但外部用户若省略则静默错 10¹¹ 倍 | 改为 `Optional[float] = None`，未传时抛 `ValueError("shell_volume_km3 is required")`；新增 2 个回归测试 |
+| P2-25 | `simulate_path` 与 `simulate_trajectory` 重复实现，前者缺少饱和保护 | `simulate_path` 在 σ=20 时仍会申请 51.7 GiB 内存并崩溃，而 `simulate_trajectory` 已加饱和保护 | 在 `simulate_path` 的循环中加同样的 8 行饱和保护；新增 1 个回归测试 `test_simulate_path_also_raises_at_saturation` |
+| P2-26 | `CalibrationEngine.validate_model` 把模拟的 per-collision 产额（~245）与历史的 total_fragments_estimated（100,000）直接比较，报出 99.8% "relative error" | 两个量纲不同：前者是 trackable >10 cm 的 per-collision 抽样，后者包含亚厘米碎片的 catalogue 总量 | 在 docstring 加 caveat 说明量纲不匹配，提示用户需先缩放到同一基准再比较 |
+| P2-27 | `study/verify_baseline.py` 用位置参数调用 `compute_loss_distribution`，在 P2-24 改 required 后崩溃 | `TypeError: takes from 2 to 6 positional arguments but 7 were given` | 改为关键字参数调用 |
+
+### 8.4 本轮复核结论
 
 - 头条不变：EL \$921.36M、VaR95 \$1,365.13M、CVaR95 \$1,565.37M、VaR99 \$1,720.77M、EVT \$1,375.08M/\$1,677.17M、保费 \$2,057.55M、每保单 \$4,115,098、16.5×（`python study/verify_baseline.py` 逐项复现）。
-- `pytest -q` = 40 passed；`python main.py` 正常重生成 5 张图。
-- 新认识：倍数对截面是**强非线性**的（σ 10→5：16.5×→0.63×），因为截面同时决定级联时间尺度；任何"倍数正比于截面"的表述都是错的。
+- `pytest -q` = 43 passed（+3：shell_volume required × 2、simulate_path 饱和保护 × 1）；`python main.py` 正常重生成 5 张图。
+- 新认识：Solvency II 命名问题横跨论文/生成器/README/op-ed/SGAC/中文讲义共 15+ 处，全部改为 "Solvency-II-style" 并在关键位置注明"6% cost-of-capital calculation of Directive 2009/138/EC is not reproduced"。
+- 新认识：`shell_volume_km3` 的默认值 1.0 km³ 是 10¹¹ 倍的陷阱，改为 required 并加 ValueError 保护。
+- PDF/DOCX 已重生成并同步到 `Lu_2026_*.pdf` 和 `docs/paper.pdf`。
 
 ---
 

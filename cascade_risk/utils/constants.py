@@ -39,7 +39,7 @@ FRAGMENT_SIZE_POWER_LAW = 1.71
 
 # --- Event-anchored fragment yields (operative sampler) ---
 # Debris-satellite yields are configuration parameters (k_debris_mu/sigma).
-# Debris-debris yields are a fixed prior: LogNormal(1.1, 0.5), median ~3.
+# Debris-debris yields are mirrored in PhysicsConfig (dd_fragment_mu/sigma).
 # Keeping them here prevents the growth model and the sensitivity chart
 # from silently drifting apart.
 DD_FRAGMENT_MU = 1.1

@@ -65,9 +65,11 @@ def main() -> None:
         e.correlation_coefficient, e.discount_rate,
     )
     ld = lm.compute_loss_distribution(
-        res.all_n_debris, p.n_debris_large,
-        p.cross_section_large_m2, p.relative_velocity_km_s, shell.volume_km3,
-        p.dt_years,
+        all_n_debris=res.all_n_debris,
+        cross_section_m2=p.cross_section_large_m2,
+        v_rel_km_s=p.relative_velocity_km_s,
+        shell_volume_km3=shell.volume_km3,
+        dt_years=p.dt_years,
     )
     hist = lm.historical_loss(e.historical_failure_rate)
     rc = RiskMetricsCalculator(evt_threshold_percentile=e.evt_threshold_percentile)

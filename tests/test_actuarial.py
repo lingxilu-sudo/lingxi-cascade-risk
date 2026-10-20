@@ -47,6 +47,18 @@ class TestLossModel:
         loss = self.model.historical_loss(failure_rate=0.005)
         assert loss == 0.005 * 50_000_000 * 500
 
+    def test_shell_volume_required_in_hit_probability(self):
+        """The old default of 1 km^3 inflated the hit probability by 1e11."""
+        n_debris = np.array([36500.0])
+        with pytest.raises(ValueError, match="shell_volume_km3 is required"):
+            self.model.compute_hit_probability(n_debris)
+
+    def test_shell_volume_required_in_loss_distribution(self):
+        """compute_loss_distribution must also require the shell volume."""
+        all_n_debris = np.full((1, 3), 36500.0)
+        with pytest.raises(ValueError, match="shell_volume_km3 is required"):
+            self.model.compute_loss_distribution(all_n_debris)
+
     def test_aggregate_losses_use_calendar_time_and_dt(self):
         """Aggregate NPV must discount by t*dt and integrate with a dt factor.
 

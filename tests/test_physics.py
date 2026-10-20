@@ -151,3 +151,17 @@ class TestSaturationGuard:
                 n_debris_0=36500, t_max_years=50.0, dt_years=0.1,
                 rng=np.random.default_rng(42),
             )
+
+    def test_simulate_path_also_raises_at_saturation(self):
+        """simulate_path must enforce the same guard as simulate_trajectory."""
+        shell = OrbitalShell(altitude_km=800, thickness_km=200)
+        cm = CollisionModel(shell=shell, cross_section_m2=20.0, v_rel_km_s=10.0)
+        gm = DebrisGrowthModel(
+            shell=shell, collision_model=cm,
+            n_satellites=8000, decay_rate_per_year=0.005,
+        )
+        with pytest.raises(RuntimeError, match="saturation scale"):
+            gm.simulate_path(
+                n_debris_0=36500, t_max_years=50.0, dt_years=0.1,
+                rng=np.random.default_rng(42),
+            )

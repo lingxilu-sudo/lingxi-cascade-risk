@@ -12,21 +12,22 @@ physics:
 
   # Population (2025 estimates, ESA Space Environment Report)
   n_debris_large: 36500          # >10 cm, trackable
-  n_debris_medium: 1000000       # 1-10 cm, lethal but untrackable
-  n_debris_small: 130000000      # <1 cm, non-lethal but erosive
   n_satellites: 8000             # Active satellites in LEO
 
   # Collision physics
-  cross_section_large_m2: 10.0   # Typical satellite cross-section
-  cross_section_medium_m2: 0.01  # 1-10cm fragment cross-section
+  cross_section_large_m2: 10.0   # Typical satellite cross-section (DS channel)
+  cross_section_dd_m2: 10.0      # DD channel: upper bound; real value may be 0.01-1 m²
   relative_velocity_km_s: 10.0   # Mean relative velocity in LEO
 
-  # NASA Standard Breakup Model parameters
+  # Event-anchored log-normal yield (calibrated to Fengyun-1C / Iridium-Cosmos catalogue counts)
   # k_debris ~ LogNormal(mu, sigma) fragments per collision
   k_debris_mu: 5.5               # ln-scale mean (~245 fragments)
   k_debris_sigma: 0.8            # ln-scale std dev
+  dd_fragment_mu: 1.1            # DD yield ln-mean (median ~3 fragments)
+  dd_fragment_sigma: 0.5         # DD yield ln-sigma
 
-  # Orbital decay
+  # Orbital decay (effective removal rate lumping atmospheric drag,
+  # collisional grinding, and catalogue dropout; not pure drag lifetime)
   decay_rate_per_year: 0.005
   decay_rate_uncertainty: 0.1    # ±10% stochastic noise
 
@@ -44,14 +45,14 @@ economics:
   # Historical baseline
   historical_failure_rate: 0.005   # 0.5% in-orbit failure rate (excl. launch)
 
-  # Insurance pricing components (Solvency II framework)
+  # Insurance pricing components (Solvency-II-style framework)
   expense_loading: 0.15          # 15% expense/profit loading
   risk_loading_multiplier: 1.5   # CVaR-based risk loading
   discount_rate: 0.04            # 4% annual discount rate
 
   # Portfolio parameters
   n_policies: 500                # Number of insured satellites
-  correlation_coefficient: 0.3   # Inter-policy correlation
+  correlation_coefficient: 0.3   # Not used in headline premium; affects variance/tail via copula only
 
   # Risk metrics
   evt_threshold_percentile: 90.0

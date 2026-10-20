@@ -74,7 +74,7 @@ class LossModel:
         n_debris: np.ndarray,
         cross_section_m2: float = 10.0,
         v_rel_km_s: float = 10.0,
-        shell_volume_km3: float = 1.0,
+        shell_volume_km3: Optional[float] = None,
     ) -> np.ndarray:
         """
         Compute per-satellite annual hit probability from debris density.
@@ -91,14 +91,17 @@ class LossModel:
             Satellite collision cross-section (m²).
         v_rel_km_s : float
             Mean relative velocity (km/s).
-        shell_volume_km3 : float
-            Orbital shell volume (km³).
-
-        Returns
-        -------
-        np.ndarray
-            Annual hit probability (same shape as n_debris).
+        shell_volume_km3 : float, required
+            Orbital shell volume (km³).  Must be supplied explicitly: the
+            previous default of 1.0 km³ inflated the hit probability by
+            ~10¹¹ and silently clipped it to 1.
         """
+        if shell_volume_km3 is None:
+            raise ValueError(
+                "shell_volume_km3 is required: pass the shell's volume "
+                "(e.g. shell.volume_km3).  The old default of 1 km^3 "
+                "inflated the hit probability by ~1e11."
+            )
         sigma_km2 = cross_section_m2 * 1e-6
         seconds_per_year = 31557600.0
 
@@ -115,7 +118,7 @@ class LossModel:
         all_n_debris: np.ndarray,
         cross_section_m2: float = 10.0,
         v_rel_km_s: float = 10.0,
-        shell_volume_km3: float = 1.0,
+        shell_volume_km3: Optional[float] = None,
         dt_years: float = 1.0,
     ) -> LossDistribution:
         """
@@ -129,8 +132,9 @@ class LossModel:
             Satellite cross-section (m²).
         v_rel_km_s : float
             Relative velocity (km/s).
-        shell_volume_km3 : float
-            Shell volume (km³).
+        shell_volume_km3 : float, required
+            Shell volume (km³).  Must be supplied explicitly; see
+            ``compute_hit_probability`` for the rationale.
         dt_years : float
             Time step of the trajectory (years). Used to convert step
             index to calendar time when discounting.

@@ -1,4 +1,4 @@
-# Zenodo Upload Information
+# Zenodo Upload Information (v4.0)
 
 ## Title
 A Physics-Based Monte Carlo Framework for Space Debris Cascade Risk and Insurance Pricing
@@ -7,52 +7,50 @@ A Physics-Based Monte Carlo Framework for Space Debris Cascade Risk and Insuranc
 Lu, Lingxi (Independent Researcher)
 
 ## Version
-2.0
+4.0
 
 ## Description
-This working paper presents a comprehensive framework for quantifying space debris cascade risk and its implications for the satellite insurance market. The model integrates collision physics (Kessler-Flournoy collision rates, NASA Standard Breakup Model) with actuarial science (Solvency II premium decomposition, Gaussian Copula correlation modeling, Extreme Value Theory tail estimation) to provide physics-driven insurance pricing.
+The commercial space insurance market, valued at approximately $1.2 billion in 2025, prices satellite risk using historical launch failure rates. No existing actuarial model accounts for cascade risk — the chain-reaction scenario in which one collision generates debris that triggers further collisions, creating correlated losses across an insurance portfolio. I present a coupled physics-actuarial model that simulates debris cascade dynamics in Low Earth Orbit (LEO) using Monte Carlo methods driven by first-principles collision physics, and translates the resulting loss distributions into risk-adjusted insurance premiums via Value at Risk (VaR) and Conditional VaR (CVaR).
 
-**Key Findings:**
-- Debris grows 41× over 50 years under business-as-usual conditions (36,500 to 1.51M objects)
-- Historical pricing underestimates risk by 16.5× (cascade-adjusted premium: $2,058M/year vs historical $125M/year)
+My baseline simulation at 800 km altitude demonstrates that debris populations grow from 36,500 to ~1.51 million objects over 50 years under business-as-usual conditions, with cascade-adjusted premiums 16.5x higher than historical-loss pricing ($2,058M vs. $125M per year for a 500-satellite portfolio). The framework is calibrated against three documented collision events (Iridium 33 x Cosmos 2251, Fengyun-1C, Kosmos 1408) and decomposes premiums into expected loss plus risk, capital, and expense loadings following the Solvency II framework.
+
+Key Findings:
+- Debris grows 41x over 50 years under business-as-usual conditions (36,500 to 1.51M objects)
+- Cascade-adjusted premiums are 16.5x higher than a 0.5% in-orbit failure benchmark ($2,058M vs. $125M/year)
 - Tail risk is substantial: CVaR(95%) ($1,565M) exceeds expected loss ($921M) by 70%
 - The framework reveals an unfunded liability of $1,933M/year in the global space insurance market
 
-**Methodology:**
+Methodology:
 - Monte Carlo simulation (1,000 paths, 50-year horizon)
-- Zero free parameters in physics layer (all parameters from NASA/IADC literature)
-- Gaussian Copula for correlated satellite losses
-- EVT/GPD for extreme tail estimation
-- Solvency II compliant premium decomposition
+- Collision rates from first-principles orbital mechanics (Kessler-Flournoy kinetics)
+- Asymmetric fragment yields: debris-satellite vs. debris-debris collisions
+- Event-anchored log-normal yield distributions calibrated to three real collision events
+- Solvency-II-style premium decomposition (Expected Loss + Risk Loading + Capital Charge + Expense Loading)
 
-**Code:** Python package `cascade_risk/` with full test suite (25 tests passing)
+Code: Python package cascade_risk/ with full test suite (43 tests passing)
 
 ## Keywords
-space debris, cascade risk, Kessler syndrome, satellite insurance, actuarial science, Monte Carlo simulation, Extreme Value Theory, Solvency II, Gaussian Copula, space sustainability
-
-## References to related research
-- Kessler, D.J. & Cour-Palais, B.G. (1978). "Collision Frequency of Artificial Satellites: The Creation of a Debris Belt." J. Geophys. Res., 83(A6), 2637-2646.
-- Liou, J.-C. & Johnson, N.L. (2008). "Instability of the present LEO satellite populations." Advances in Space Research, 41(7), 1046-1053.
-- McNeil, A.J., Frey, R. & Embrechts, P. (2015). Quantitative Risk Management. Princeton University Press.
-
-## Funding
-Independent research
+space debris, cascade risk, Kessler syndrome, satellite insurance, actuarial science, Monte Carlo simulation, Solvency II, space sustainability
 
 ## DOI
 Concept DOI: 10.5281/zenodo.23095041 (points to latest version)
-Version 2.0 DOI: 10.5281/zenodo.23153568
+Version 4.0 DOI: 10.5281/zenodo.23501684
+Previous Version 3.0 DOI: 10.5281/zenodo.23492894
 
 ## Files to Upload
-1. **framework_paper.pdf** - Main research paper (v2.0)
+1. framework_paper.pdf - Main research paper (v4.0, 2026-10-20)
 
 ## License
 CC BY 4.0 (Creative Commons Attribution 4.0 International)
 
 ## Record URL
-https://zenodo.org/records/23153568
+https://zenodo.org/records/23501684
 
 ## GitHub Repository
 https://github.com/lingxilu-sudo/lingxi-cascade-risk
+
+## Website
+https://4physics.xyz/explainer/
 
 ## Contact
 ling.xi.lu@gmail.com

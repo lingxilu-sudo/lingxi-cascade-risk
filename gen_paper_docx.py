@@ -426,7 +426,7 @@ make_styled_table(doc,
 )
 
 add_table_note(doc, 
-    "Without this distinction, the N^2 scaling of DD rates combined with high yields (~245) would produce a much earlier finite-time singularity. With the asymmetry, the baseline mean-field backbone diverges at t* = 61 years, only 11 years beyond the 50-year horizon. The asymmetry reflects the energy differential: a fragment striking an intact satellite releases orders of magnitude more energy than two small fragments colliding."
+    "Without this distinction, the N^2 scaling of DD rates combined with high yields (~245) would produce unphysical runaway growth. The asymmetry reflects the energy differential: a fragment striking an intact satellite releases orders of magnitude more energy than two small fragments colliding."
 )
 
 add_heading_styled(doc, "2.1.3 Stochastic Time-Stepping", level=3)
@@ -438,7 +438,7 @@ add_body_text(doc,
 add_heading_styled(doc, "2.2 Economic Layer: From Debris to Insurance Premiums", level=2)
 
 add_body_text(doc, 
-    "Getting from debris population to financial loss takes four steps. First, I compute per-satellite annual hit probability p_hit = N_d * sigma * v * T / V. Second, I calculate per-policy expected loss = p_hit * V_sat ($50M average). Third, I aggregate across 500 insured satellites; expected loss is correlation-invariant. A separate Gaussian-copula module (rho = 0.3) is used for variance and tail analysis but does not enter the headline premium. Fourth, I pull out VaR, CVaR, and EVT risk metrics from 1,000 Monte Carlo paths."
+    "Getting from debris population to financial loss takes four steps. First, I compute per-satellite annual hit probability p_hit = N_d * sigma * v * T / V. Second, I calculate per-policy expected loss = p_hit * V_sat ($50M average). Third, I aggregate across 500 insured satellites; an inter-policy loss correlation (rho = 0.3, driven by the shared debris environment) widens the tail but does not change the portfolio mean. Fourth, I pull out VaR and CVaR risk metrics from 1,000 Monte Carlo paths."
 )
 
 add_heading_styled(doc, "2.2.1 Solvency-II-style Premium Decomposition", level=3)
@@ -499,8 +499,8 @@ add_heading_styled(doc, "2.4 Validation Against Current Observations", level=2)
 make_styled_table(doc,
     ['Metric', 'Model Value', 'Observed/Market Data', 'Source'],
     [
-        ['Tracked debris (>10cm), 2025', '36,500', '36,500', '[11]'],
-        ['Global insurance market, 2025', '-', '$1.2B', '[10]'],
+        ['Tracked debris (>10cm), 2025', '36,500', '36,500', '[9]'],
+        ['Global insurance market, 2025', '-', '$1.2B', '[8]'],
         ['In-orbit failure benchmark', '0.5%', 'Assumption, not observed premium', 'Model assumption'],
         ['Fengyun-1C fragments', '~3,500', '~3,500', '[4]'],
         ['Iridium-Cosmos fragments', '~2,300', '~2,300', '[4]'],
@@ -510,7 +510,7 @@ make_styled_table(doc,
 )
 
 add_table_note(doc,
-    "The model's initial conditions align with current observational data from the ESA Space Environment Report 2025 [11]. The event counts match IADC records and NASA fragmentation data [4] as an order-of-magnitude check. The cascade-adjusted premium of $2,058M/year is a conditional estimate of what cascade-aware pricing would be, compared with a $125M/year benchmark that applies a 0.5% of hull value rate to the same 500 satellites. The 0.5% rate is a modelling assumption, used here only as a reference point; it is not an observed market premium. The 16.5x ratio is conditional on assigning the entire >10 cm catalogue to the 700-900 km shell, on expected claim counts, and on a mean-field backbone whose finite-time singularity is at t* = 61 years."
+    "The model's initial conditions align with current observational data from the ESA Space Environment Report 2025 [9]. The event counts match IADC records and NASA fragmentation data [4] as an order-of-magnitude check. The cascade-adjusted premium of $2,058M/year is a conditional estimate of what cascade-aware pricing would be, compared with a $125M/year benchmark that applies a 0.5% of hull value rate to the same 500 satellites. The 0.5% rate is a modelling assumption, used here only as a reference point; it is not an observed market premium. The 16.5x ratio is conditional on the single-shell approximation, the DD cross-section upper bound, and the choice of benchmark."
 )
 
 # ===== 3. RESULTS =====================================================
@@ -547,9 +547,6 @@ make_styled_table(doc,
         ['CVaR (95%) / ES', 'Avg loss beyond VaR(95%)', '$1,565M'],
         ['VaR (99%)', '99th pctile worst-year loss', '$1,721M'],
         ['CVaR (99%) / ES', 'Avg loss beyond VaR(99%)', '$1,854M'],
-        ['EVT VaR (95%)', 'Generalized Pareto estimate with exceedance ratio', '$1,375M'],
-        ['EVT VaR (99%)', 'Generalized Pareto estimate with exceedance ratio', '$1,677M'],
-        ['GPD shape (xi)', 'Tail index (xi<0: bounded tail)', '-0.032'],
     ]
 )
 
@@ -576,7 +573,7 @@ add_table_note(doc,
 add_heading_styled(doc, "3.4 Key Findings", level=2)
 
 add_body_text(doc, 
-    "1. Debris grows 41x over 50 years (36,500 to 1.51M) in the baseline path. The driver is the N^2 feedback in debris-debris collision rates, which produces faster-than-exponential (hyperbolic) growth and a finite-time singularity in the mean-field backbone at t* = 61 years. The 50-year horizon sits at 82% of t*, so late-horizon levels are sensitive to the yield scale and decay rate. Liou and Johnson (2008) reached a qualitatively similar conclusion about the instability of the present LEO population."
+    "1. Debris grows 41x over 50 years (36,500 to 1.51M) in the baseline path. The driver is the N^2 feedback in debris-debris collision rates, which produces accelerating growth: more debris means more collisions, which means more debris. Liou and Johnson (2008) reached a qualitatively similar conclusion about the instability of the present LEO population."
 )
 
 add_body_text(doc, 
@@ -584,15 +581,11 @@ add_body_text(doc,
 )
 
 add_body_text(doc, 
-    "3. Tail risk is substantial. CVaR(95%) ($1,565M) exceeds expected loss ($921M) by 70%. The Generalized Pareto fit gives xi = -0.032, a bounded tail, with an exceedance ratio zeta = 0.10. With zeta included, EVT VaR(95%) is $1,375M against an empirical $1,365M (+0.7%), and EVT VaR(99%) is $1,677M against $1,721M (-2.5%). EVT therefore corroborates the empirical tail rather than extending it; an earlier version that omitted zeta reported $1,803M and a spurious 32% gap."
+    "3. Tail risk is substantial. CVaR(95%) ($1,565M) exceeds expected loss ($921M) by 70%, indicating that extreme cascade scenarios produce losses well above the mean."
 )
 
 add_body_text(doc, 
-    "4. Risk loading dominates the premium. The CVaR-based risk loading ($966M) exceeds the expected loss ($921M). This reflects the heavy-tailed nature of cascade losses, a direct consequence of the quadratic feedback mechanism."
-)
-
-add_body_text(doc, 
-    "5. EVT confirms a bounded tail. The GPD shape parameter xi = -0.032 indicates a Type III (bounded) tail, and the corrected EVT quantiles sit within 3% of the empirical ones. The tail is severe in economic terms (CVaR 70% above the mean) but it is not heavy in the EVT sense, and the premium therefore relies on empirical CVaR and VaR rather than on an extrapolated tail."
+    "4. Risk loading dominates the premium. The CVaR-based risk loading ($966M) exceeds the expected loss ($921M). This reflects the right-skewed loss distribution, a direct consequence of the quadratic feedback mechanism."
 )
 
 # ===== 4. DISCUSSION ==================================================
@@ -635,13 +628,13 @@ add_body_text(doc,
 add_heading_styled(doc, "4.4 Limitations", level=2)
 
 add_body_text(doc, 
-    "Several limitations warrant discussion. First, the single-shell approximation (800 km only) does not capture the full 3D orbital environment with inclination and eccentricity distributions, and it assigns the entire global >10 cm catalogue (36,500 objects) to the 700-900 km shell; a sensitivity check over N0 = 8,000 to 36,500 moves expected loss from $114M to $925M. Second, fragment physics are simplified: the log-normal yield is an event-anchored prior, not a formal calibration, and collision mass and energy do not enter the sampler. Each debris-debris event's ~3 fragments are added to the >10 cm count and both channels share a 10 m2 satellite cross-section; excluding the DD fragments lowers expected loss to $462.6M and a 1 m2 DD section to $484.1M, so the headline is an upper bound in this dimension. Third, the mean-field backbone has a finite-time singularity at t* = 61 years, only 11 years beyond the horizon, and small parameter changes move t* between roughly 27 and 136 years. Fourth, the loss bridge uses expected claim counts rather than binomial sampling; a binomial check raises expected loss by about 35% ($1,243M vs $921M) and VaR(95%) by about 28%, so the headline understates rather than overstates claim-count noise. Fifth, the 0.5% benchmark is an assumption: at 0.3% the multiplier is 27.5x and at 1.0% it is 8.2x. Sixth, the model does not include active debris removal. Seventh, the satellite population is static - mega-constellation deployments and end-of-life deorbiting are not dynamically modeled. Eighth, there is no cross-altitude debris migration."
+    "Several limitations warrant discussion. First, the single-shell approximation (800 km only) does not capture the full 3D orbital environment, and the framework covers only >10 cm catalogue objects; the roughly one million 1-10 cm objects are not modeled. Second, the debris-debris collision rate is an upper bound: both channels share a 10 m2 satellite cross-section, whereas the true DD cross-section for two >10 cm objects is ~0.01 m2, 2-3 orders of magnitude smaller. The 16.5x cascade factor is materially dependent on the DD term. Third, the orbital decay parameter is an effective removal rate lumping atmospheric drag, collisional grinding, and catalogue dropout, not pure drag lifetime. Fourth, the 0.5% benchmark is an in-orbit failure assumption, not an observed market premium: 0.3% gives 27.5x and 1% gives 8.2x. Fifth, the fragment yield is an event-anchored log-normal prior calibrated to observed fragment counts from three historical events, not a physics-based calibration using collision mass and energy."
 )
 
 add_heading_styled(doc, "4.5 Future Work", level=2)
 
 add_body_text(doc, 
-    "Future research directions include: (1) multi-shell model with cross-altitude migration; (2) NORAD TLE data integration for empirical debris tracking; (3) dynamic constellation deployment modeling; (4) ADR scenario analysis and premium reduction quantification; (5) reinsurance layer pricing (excess-of-loss, stop-loss, catastrophe bonds); (6) Sobol global sensitivity analysis to identify the most impactful parameters."
+    "Future research directions include: (1) multi-shell model with cross-altitude migration; (2) NORAD TLE data integration for empirical debris tracking; (3) dynamic constellation deployment modeling; (4) ADR scenario analysis and premium reduction quantification; (5) reinsurance layer pricing (excess-of-loss, stop-loss, catastrophe bonds)."
 )
 
 # ===== 5. CONCLUSION ==================================================
@@ -649,7 +642,7 @@ add_body_text(doc,
 add_heading_styled(doc, "5. Conclusion", level=1)
 
 add_body_text(doc, 
-    "This framework shows that incorporating physics-based cascade dynamics into insurance pricing produces premiums 16.5x a 0.5%-of-hull in-orbit failure benchmark for a 500-satellite portfolio in one shell. The main methodological point is that the cascade rate is not an adjustable knob: debris growth is driven by collision rates derived from orbital mechanics, with event-anchored fragment yields and an asymmetric treatment of debris-satellite versus debris-debris collisions. The headline is conditional on single-shell accounting, expected claim counts, and proximity to a finite-time singularity at t* = 61 years; each condition is quantified in the limitations."
+    "This framework shows that incorporating physics-based cascade dynamics into insurance pricing produces premiums 16.5x a 0.5%-of-hull in-orbit failure benchmark for a 500-satellite portfolio in one shell. The main methodological point is that the cascade rate is not an adjustable knob: debris growth is driven by collision rates derived from orbital mechanics, with event-anchored fragment yields and an asymmetric treatment of debris-satellite versus debris-debris collisions. The magnitude is conditional on the single-shell approximation, the DD cross-section upper bound, and the choice of benchmark; these caveats are discussed in the limitations."
 )
 
 add_body_text(doc, 
@@ -666,13 +659,11 @@ refs = [
     'Liou, J.-C. and Johnson, N.L. (2008). "Instability of the present LEO satellite populations." Advances in Space Research, 41(7), 1046-1053.',
     'Johnson, N.L. et al. (2008). "History of On-Orbit Satellite Fragmentations, 14th Edition." NASA Orbital Debris Program Office.',
     'Freeman, R. et al. (2021). "An actuarial modifier for underwriting OOS satellite insurance." J. Space Operations.',
-    'McNeil, A.J., Frey, R. and Embrechts, P. (2015). Quantitative Risk Management. 2nd ed. Princeton University Press.',
     'European Commission (2009). "Solvency II Directive." 2009/138/EC.',
     'IADC (2007). "Space Debris Mitigation Guidelines." Inter-Agency Space Debris Coordination Committee.',
     'UNCOPUOS (2019). "Space 2030 Agenda." United Nations Committee on the Peaceful Uses of Outer Space.',
     'World Economic Forum / Centre for Space Futures (2026). "Clear Orbit, Secure Future: A Call to Action on Space Debris."',
     'ESA Space Environment Report (2025). European Space Agency.',
-    'Saltelli, A. et al. (2010). "Variance based sensitivity analysis." Comput. Phys. Commun., 181(2), 259-270.',
 ]
 
 for i, ref in enumerate(refs, 1):

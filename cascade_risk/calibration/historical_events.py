@@ -64,13 +64,13 @@ KNOWN_EVENTS: list[CollisionEvent] = [
         relative_velocity_km_s=8.0,
         trackable_fragments=3500,
         total_fragments_estimated=150_000,
-        total_mass_kg=880,
+        total_mass_kg=880,  # NASA ODPO / Johnson et al. (2008); some sources give 750 kg
     ),
     CollisionEvent(
         name="Kosmos 1408 ASAT",
         date="2021-11-15",
         altitude_km=480,
-        relative_velocity_km_s=7.0,
+        relative_velocity_km_s=14.5,  # Retrograde intercept; Bates et al. (2022), NASA ODPO
         trackable_fragments=1500,
         total_fragments_estimated=50_000,
         total_mass_kg=2200,
@@ -134,6 +134,16 @@ class CalibrationEngine:
     ) -> dict[str, float]:
         """
         Compare simulated fragment distribution against a real event.
+
+        Caveat: the default comparison is against ``total_fragments_estimated``
+        (100,000 / 150,000 / 50,000), which includes sub-centimetre debris
+        and is a catalogue total rather than a per-collision yield.  The
+        simulator's operative yield is a per-collision log-normal sample
+        (~245 for DS, ~3 for DD) of trackable (>10 cm) fragments, so the
+        two quantities are not on the same basis.  A direct comparison
+        produces a large "relative error" that reflects the unit mismatch
+        rather than a model failure.  Use this method only after rescaling
+        ``simulated_fragments`` to the same basis as the observed field.
 
         Parameters
         ----------

@@ -172,7 +172,7 @@
 <section class="hero">
   <h1>Coupling orbital mechanics with actuarial science for satellite insurance pricing</h1>
   <a href="#summary" class="btn-primary">1-min summary &darr;</a>
-  <a href="paper.pdf" class="download-link" target="_blank">Download full paper (PDF)</a>
+  <a href="https://zenodo.org/records/23501684/files/framework_paper.pdf" class="download-link" target="_blank">Download full paper (PDF) &mdash; Zenodo v4.0</a>
 </section>
 
 <!-- SUMMARY CARD -->
@@ -191,6 +191,13 @@
       <p>By year 50 of the horizon, cascade-adjusted premiums reach 16.5&times; a static 0.5%-of-hull benchmark ($2,058M vs $125M per year for 500 satellites). At year 0 the same model's expected loss is 0.18&times; the benchmark, so the gap measures how fast a premium that never updates falls behind a growing cascade &mdash; not today's mispricing.</p>
     </div>
   </div>
+  <p style="margin-top:1.2rem;font-size:0.8rem;color:var(--text-secondary);">
+    <a href="https://doi.org/10.5281/zenodo.23501684" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600;">DOI: 10.5281/zenodo.23501684</a>
+    &middot;
+    <a href="https://github.com/lingxilu-sudo/lingxi-cascade-risk" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600;">GitHub</a>
+    &middot;
+    <a href="https://zenodo.org/records/23501684/files/framework_paper.pdf" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600;">PDF</a>
+  </p>
 </section>
 
 <!-- MAIN CONTENT -->
@@ -221,14 +228,14 @@
         self-sustaining: each impact generates more debris than natural decay removes,
         leading to exponential growth. In the worst case, entire orbital shells become
         unusable &mdash; a scenario sometimes called "cascading collisional breakup."
-        In this model the production term dominates decay at every population
-        (b &gt; &lambda;), so there is no stable equilibrium: the finite-time singularity
-        at t* &asymp; 61 years plays the role of the threshold.
+        In this model the satellite-breakup production term dominates decay at every
+        population (b &gt; &lambda;), so debris grows without a stable equilibrium &mdash;
+        a positive feedback loop driven by N&sup2; scaling of debris&ndash;debris collisions.
       </p>
     </div>
 
     <p>
-      This framework presents the first quantitative model that couples physics-based
+      This framework presents an integrated model that couples physics-based
       cascade simulation with actuarial pricing. The result: by the end of the 50-year
       horizon, the fair annual premium is <strong>16.5 times</strong> today's static
       0.5%-of-hull benchmark &mdash; a gap that measures how fast a static premium falls
@@ -291,9 +298,10 @@
       <p>
         Debris&ndash;debris collision rate scales with N<sub>d</sub>&sup2; &mdash; doubling
         the debris <em>quadruples</em> the collision rate. Each collision produces new
-        fragments (anchored to the NASA Standard Breakup Model as an order-of-magnitude
-        check), which further accelerate collisions. This is the mathematical root of the
-        cascade: a self-reinforcing loop that decay alone cannot arrest at these rates.
+        fragments (event-anchored log-normal distributions, asymmetric between debris&ndash;satellite
+        and debris&ndash;debris channels), which further accelerate collisions. This is the
+        mathematical root of the cascade: a self-reinforcing loop that decay alone cannot
+        arrest at these rates.
       </p>
     </div>
   </section>
@@ -408,12 +416,12 @@
       <p>
         <strong>Step 2:</strong> Multiply hit probability by satellite value ($50M average)
         to get per-policy expected loss. Then aggregate across the 500-satellite insured
-        portfolio, applying a Gaussian Copula to model correlated losses (when debris
-        increases, all satellites become more vulnerable simultaneously).
+        portfolio. Correlation between satellite losses widens the tail of the loss
+        distribution but does not change the portfolio mean.
       </p>
       <p>
         <strong>Step 3:</strong> From the loss distribution across 1,000 Monte Carlo paths,
-        extract risk metrics (VaR, CVaR, EVT) and price using a Solvency-II-style framework.
+        extract risk metrics (VaR, CVaR) and price using a Solvency-II-style framework.
       </p>
     </div>
 
@@ -424,7 +432,7 @@
       <div class="flow-arrow">&rarr;</div>
       <div class="flow-node"><div class="fi">&#128176;</div><div class="fl">Loss Distribution</div></div>
       <div class="flow-arrow">&rarr;</div>
-      <div class="flow-node"><div class="fi">&#128200;</div><div class="fl">VaR / CVaR / EVT</div></div>
+      <div class="flow-node"><div class="fi">&#128200;</div><div class="fl">VaR / CVaR</div></div>
       <div class="flow-arrow">&rarr;</div>
       <div class="flow-node"><div class="fi">&#127974;</div><div class="fl">Premium</div></div>
     </div>
@@ -458,16 +466,14 @@
           <tr><td>CVaR&#8329;&#8325; (ES)</td><td>Expected shortfall beyond VaR&#8329;&#8325;</td><td class="num">$1,565M</td></tr>
           <tr><td>VaR&#8329;&#8329;</td><td>99th percentile of worst-year loss</td><td class="num">$1,721M</td></tr>
           <tr><td>CVaR&#8329;&#8329; (ES)</td><td>Expected shortfall beyond VaR&#8329;&#8329;</td><td class="num">$1,854M</td></tr>
-          <tr><td>EVT VaR&#8329;&#8325;</td><td>Generalized Pareto tail estimate (&zeta; = 0.10)</td><td class="num">$1,375M</td></tr>
-          <tr><td>EVT shape (&xi;)</td><td>Heavy-tail indicator (&xi;&lt;0 &rarr; bounded)</td><td class="num">&minus;0.032</td></tr>
         </tbody>
       </table>
       <p>
-        The EVT shape parameter &xi; = &minus;0.032 indicates a slightly bounded tail
-        (Type III). Fitted above the 90th percentile with the exceedance ratio &zeta; = 0.10
-        included, the GPD estimate of VaR&#8329;&#8325; is $1,375M &mdash; only 0.7% above the
-        empirical $1,365M &mdash; and VaR&#8329;&#8329; is $1,677M, 2.5% below the empirical
-        $1,721M. EVT therefore corroborates the empirical tail rather than extending it.
+        With 1,000 Monte Carlo paths, the 95th percentile is estimated from roughly the
+        top 50 samples (standard error ~3&ndash;5%), and the 99th percentile from roughly
+        the top 10 (standard error ~10&ndash;15%). CVaR is more stable than VaR because it
+        averages over the entire tail rather than relying on a single quantile &mdash; which
+        is why Solvency II and Basel frameworks prefer CVaR (Expected Shortfall) over VaR.
       </p>
     </div>
   </section>
@@ -488,7 +494,7 @@
       <div class="compare-card new">
         <div class="cc-tag">Cascade-Adjusted, Year 50</div>
         <div class="cc-val">$2,058M</div>
-        <div class="cc-desc">Physics-driven model with collision feedback and a Solvency-II-style capital structure; EVT is a diagnostic cross-check.</div>
+        <div class="cc-desc">Physics-driven model with collision feedback and a Solvency-II-style capital structure.</div>
       </div>
     </div>
 
@@ -550,12 +556,12 @@
       and portfolio size remain modelling choices and are reported as such.</p>
       <p><strong>Step 2 &mdash; Monte Carlo ensemble.</strong> 1,000 independent 50-year paths
       produce a full probability distribution of debris trajectories and corresponding losses.</p>
-      <p><strong>Step 3 &mdash; Risk quantification.</strong> VaR, CVaR, and EVT (Generalized
-      Pareto Distribution, with the exceedance ratio &zeta;) are extracted from the
-      worst-year loss distribution; EVT is a diagnostic cross-check.</p>
+      <p><strong>Step 3 &mdash; Risk quantification.</strong> VaR and CVaR are extracted from the
+      worst-year loss distribution. With 1,000 paths, the 95th percentile has ~50 effective
+      samples (SE ~3&ndash;5%); CVaR is preferred over VaR for its stability.</p>
       <p><strong>Step 4 &mdash; Premium calculation.</strong> Solvency-II-style decomposition on the
-      worst-year loss sample. A separate Gaussian-copula module analyzes portfolio
-      correlation; it is not used in the headline premium.</p>
+      worst-year loss sample. Correlation between satellite losses widens the tail but does
+      not change the portfolio mean.</p>
     </div>
 
     <div class="card">
@@ -576,10 +582,9 @@
         which would slow the debris growth.
       </p>
       <p>
-        <strong>Simplified fragment physics.</strong> The operative fragment yield is an
+        <strong>Simplified fragment physics.</strong> The fragment yield is an
         event-anchored log-normal prior, not a formal calibration. Collision mass and energy
-        do not enter the sampler, and the NASA Standard Breakup Model is used only as an
-        order-of-magnitude anchor.
+        do not enter the sampler.
       </p>
       <p>
         <strong>Catalogue-scale count with a generous debris&ndash;debris term.</strong> The model
@@ -589,26 +594,14 @@
         expected loss from $921.4M to $462.6M; a 1 m&sup2; debris&ndash;debris section gives
         793,000 and $484.1M. The 16.5&times; is therefore an upper bound in this dimension.
       </p>
-      <p>
-        <strong>Finite-time singularity.</strong> The deterministic backbone diverges at
-        t* &asymp; 61 years, only 11 years beyond the horizon, so the 41&times; growth is a
-        horizon-specific projection rather than a stable long-run rate.
-      </p>
-      <p>
-        <strong>Benchmark and timing.</strong> The 0.5% in-orbit failure rate is an
-        assumption; at 1% the multiple is 8.2&times;, at 0.3% it is 27.5&times;. The sample is
-        each path's worst year (the final step in 100% of paths), so the headline is the
-        year-50 fair premium, not today's.
-      </p>
     </div>
 
     <div class="card">
       <h3>Planned Extensions</h3>
       <p>
         Multi-shell model with cross-altitude migration; NORAD TLE data integration for
-        empirical debris tracking; dynamic constellation deployment modeling; reinsurance
-        layer pricing (excess-of-loss, stop-loss structures); and sensitivity analysis
-        using Sobol indices to identify the most impactful parameters.
+        empirical debris tracking; dynamic constellation deployment modeling; and
+        reinsurance layer pricing (excess-of-loss, stop-loss structures).
       </p>
     </div>
   </section>
@@ -618,10 +611,17 @@
 <!-- FOOTER -->
 <footer id="contact" class="footer">
   <p>
-    <strong>Author:</strong> Lingxi Lu | Suzhou Foreign Language School
+    <strong>Author:</strong> Lingxi Lu | Independent Researcher
   </p>
   <p>
-    <a href="paper.pdf" target="_blank">Download PDF</a>
+    <strong>DOI:</strong> <a href="https://doi.org/10.5281/zenodo.23501684" target="_blank">10.5281/zenodo.23501684</a> (v4.0) &middot;
+    <a href="https://doi.org/10.5281/zenodo.23095041" target="_blank">Concept DOI</a>
+  </p>
+  <p>
+    <strong>Code:</strong> <a href="https://github.com/lingxilu-sudo/lingxi-cascade-risk" target="_blank">github.com/lingxilu-sudo/lingxi-cascade-risk</a>
+  </p>
+  <p>
+    <a href="https://zenodo.org/records/23501684/files/framework_paper.pdf" target="_blank" class="download-link">Download PDF (Zenodo v4.0)</a>
   </p>
 </footer>
 

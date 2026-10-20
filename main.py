@@ -60,6 +60,7 @@ def build_models(config: Config):
     collision_model = CollisionModel(
         shell=shell,
         cross_section_m2=p.cross_section_large_m2,
+        cross_section_dd_m2=p.cross_section_dd_m2,
         v_rel_km_s=p.relative_velocity_km_s,
         k_debris_mu=p.k_debris_mu,
         k_debris_sigma=p.k_debris_sigma,
@@ -173,7 +174,7 @@ def run_pipeline(config: Config, output_dir: Path, n_paths_override: int = None)
 
     # --- Results ---
     print("\n" + "=" * 70)
-    print("RESULTS: Cascade Risk Framework v2.0")
+    print("RESULTS: Cascade Risk Framework v3.0")
     print("=" * 70)
     print()
     print("SIMULATION:")

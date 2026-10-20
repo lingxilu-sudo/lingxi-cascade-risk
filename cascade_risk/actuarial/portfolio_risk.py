@@ -136,7 +136,7 @@ class PortfolioRiskModel:
             L = linalg.cholesky(corr_matrix, lower=True)
         except linalg.LinAlgError:
             # Fallback: use nearest positive definite matrix
-            corr_matrix = self._nearest_positive_definite(corr_matrix)
+            corr_matrix = self._jitter_to_positive_definite(corr_matrix)
             L = linalg.cholesky(corr_matrix, lower=True)
 
         # Simulate correlated losses
@@ -196,7 +196,7 @@ class PortfolioRiskModel:
         )
 
     @staticmethod
-    def _nearest_positive_definite(matrix: np.ndarray) -> np.ndarray:
+    def _jitter_to_positive_definite(matrix: np.ndarray) -> np.ndarray:
         """Force a symmetric matrix to be positive definite.
 
         For symmetric input the SVD of A is A = V S Vᵀ, so ``Vᵀ diag(s) V``

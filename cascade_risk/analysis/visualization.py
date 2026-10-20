@@ -249,12 +249,13 @@ class PlotGenerator:
 
         n0 = p.n_debris_large
 
-        def t_star(k_mu, decay, v_rel, n_sat, sigma_m2,
+        def t_star(k_mu, decay, v_rel, n_sat, sigma_m2, sigma_dd_m2,
                    k_dd_mu=DD_FRAGMENT_MU):
-            q = sigma_m2 * 1e-6 * v_rel * 31557600.0 / shell.volume_km3
-            b = float(np.exp(k_mu + p.k_debris_sigma ** 2 / 2)) * n_sat * q
+            q_ds = sigma_m2 * 1e-6 * v_rel * 31557600.0 / shell.volume_km3
+            q_dd = sigma_dd_m2 * 1e-6 * v_rel * 31557600.0 / shell.volume_km3
+            b = float(np.exp(k_mu + p.k_debris_sigma ** 2 / 2)) * n_sat * q_ds
             k_dd = float(np.exp(k_dd_mu + DD_FRAGMENT_SIGMA ** 2 / 2))
-            a = 0.5 * k_dd * q
+            a = 0.5 * k_dd * q_dd
             alpha = b - decay
             if alpha <= 0:
                 return np.inf  # decay dominates: no finite-time blow-up
@@ -267,12 +268,14 @@ class PlotGenerator:
             v_rel=p.relative_velocity_km_s,
             n_sat=p.n_satellites,
             sigma_m2=p.cross_section_large_m2,
+            sigma_dd_m2=p.cross_section_dd_m2,
             k_dd_mu=DD_FRAGMENT_MU,
         )
         params = {
             "Debris yield (ln-mean)": ("k_mu", 4.5, 6.5),
             "DD yield (ln-mean)": ("k_dd_mu", 0.6, 1.6),
-            "Cross-section": ("sigma_m2", 5.0, 20.0),
+            "Cross-section (DS)": ("sigma_m2", 5.0, 20.0),
+            "Cross-section (DD)": ("sigma_dd_m2", 0.1, 10.0),
             "Active satellites": ("n_sat", 4000, 12000),
             "Relative velocity": ("v_rel", 7.0, 14.0),
             "Orbital decay rate": ("decay", 0.002, 0.010),

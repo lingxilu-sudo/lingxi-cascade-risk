@@ -38,9 +38,16 @@ sensitivity:
       unit: "count"
 
     cross_section_large_m2:
-      label: "Satellite Cross-Section"
+      label: "Satellite Cross-Section (DS)"
       low: 5.0
       high: 20.0
+      base: 10.0
+      unit: "m²"
+
+    cross_section_dd_m2:
+      label: "DD Cross-Section"
+      low: 0.1
+      high: 10.0
       base: 10.0
       unit: "m²"
 

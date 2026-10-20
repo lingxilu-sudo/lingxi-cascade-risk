@@ -101,6 +101,12 @@ class DebrisGrowthModel:
         """
         Run a single Monte Carlo path of debris evolution.
 
+        .. deprecated::
+            Use :meth:`simulate_trajectory` instead.  This method returns a
+            ``DebrisState`` object while ``simulate_trajectory`` returns raw
+            arrays; both run identical dynamics.  Kept for regression-test
+            coverage only.
+
         Parameters
         ----------
         n_debris_0 : float
@@ -138,6 +144,22 @@ class DebrisGrowthModel:
 
             if i == n_steps - 1:
                 break
+
+            # Numerical / physical guard.  R_dd ∝ N², so once N approaches
+            # the saturation scale 1/q the per-step Poisson count grows into
+            # the billions and the log-normal draw tries to allocate tens of
+            # GB (at σ=20 m² this happened inside the 50-year horizon).  The
+            # dilute-gas rate is meaningless there anyway; fail loudly instead
+            # of exhausting memory.
+            n_saturation = self.collision_model.saturation_population
+            if n_debris >= n_saturation:
+                raise RuntimeError(
+                    f"Debris population reached the shell-saturation scale "
+                    f"({n_debris:,.0f} >= {n_saturation:,.0f}) at "
+                    f"t={times[i]:.1f} yr. The dilute-gas collision rate no "
+                    f"longer applies; shorten t_max_years or reduce the "
+                    f"cross-section / relative velocity."
+                )
 
             # --- Stochastic decay rate ---
             decay_noise = rng.normal(1.0, decay_uncertainty)

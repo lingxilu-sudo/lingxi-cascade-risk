@@ -14,9 +14,8 @@ where n₁, n₂ are population counts, σ is the combined cross-section,
 v_rel is the mean relative velocity, and V_shell is the shell volume.
 
 Collision events follow a Poisson process, and each collision produces a
-random number of fragments from an event-anchored log-normal yield.  The
-NASA Standard Breakup Model is retained only as an order-of-magnitude
-anchor; it is not evaluated by the sampler.
+random number of fragments from an event-anchored log-normal yield
+calibrated to observed fragmentation events (Fengyun-1C, Iridium-Cosmos).
 
 References:
     Kessler, D.J. (1981). Icarus, 48(1), 39-48.
@@ -29,18 +28,12 @@ References:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+import warnings
 
 import numpy as np
 
 from cascade_risk.physics.orbital_shell import OrbitalShell
-from cascade_risk.utils.constants import (
-    SECONDS_PER_YEAR,
-    NASA_BREAKUP_COEFFICIENT,
-    NASA_BREAKUP_EXPONENT_MASS,
-    NASA_BREAKUP_EXPONENT_ENERGY,
-    NASA_BREAKUP_EXPONENT_SIZE,
-)
+from cascade_risk.utils.constants import SECONDS_PER_YEAR
 
 
 @dataclass(frozen=True)
@@ -61,7 +54,11 @@ class CollisionModel:
     shell : OrbitalShell
         The orbital shell geometry.
     cross_section_m2 : float
-        Characteristic collision cross-section (m²).
+        Characteristic collision cross-section (m²) for debris-satellite.
+    cross_section_dd_m2 : float
+        Collision cross-section (m²) for debris-debris. Default equals
+        the satellite value (upper bound); real DD cross-section may be
+        2-3 orders of magnitude smaller.
     v_rel_km_s : float
         Mean relative velocity (km/s).
     k_debris_mu : float
@@ -74,18 +71,21 @@ class CollisionModel:
         self,
         shell: OrbitalShell,
         cross_section_m2: float = 10.0,
+        cross_section_dd_m2: float = 10.0,
         v_rel_km_s: float = 10.0,
         k_debris_mu: float = 5.5,
         k_debris_sigma: float = 0.8,
     ):
         self.shell = shell
         self.cross_section_m2 = cross_section_m2
+        self.cross_section_dd_m2 = cross_section_dd_m2
         self.v_rel_km_s = v_rel_km_s
         self.k_debris_mu = k_debris_mu
         self.k_debris_sigma = k_debris_sigma
 
         # Precompute constant factor for collision rate
         self._sigma_km2 = cross_section_m2 * 1e-6  # m² → km²
+        self._sigma_dd_km2 = cross_section_dd_m2 * 1e-6  # m² → km²
         self._v_rel_km_per_year = v_rel_km_s * SECONDS_PER_YEAR
 
     # ------------------------------------------------------------------
@@ -134,39 +134,30 @@ class CollisionModel:
             0.5
             * n_debris
             * (n_debris - 1)
-            * self._sigma_km2
+            * self._sigma_dd_km2
             * self._v_rel_km_per_year
             / self.shell.volume_km3
         )
 
     # ------------------------------------------------------------------
-    # Fragment generation (NASA Standard Breakup Model)
+    # Fragment generation (event-anchored log-normal yield)
     # ------------------------------------------------------------------
 
     def generate_fragments(
         self,
         rng: np.random.Generator,
-        total_mass_kg: float = 1500.0,
-        collision_energy_j: Optional[float] = None,
     ) -> int:
         """
         Sample the number of trackable fragments from one collision.
 
-        The operative yield is the event-anchored log-normal distribution
-        specified by ``k_debris_mu`` / ``k_debris_sigma``.  The NASA
-        Standard Breakup Model in ``constants.py`` is retained as an
-        order-of-magnitude anchor but is **not** evaluated here.
+        The yield is drawn from an event-anchored log-normal distribution
+        specified by ``k_debris_mu`` / ``k_debris_sigma``, calibrated to
+        observed fragmentation events (Fengyun-1C, Iridium-Cosmos).
 
         Parameters
         ----------
         rng : np.random.Generator
             Random number generator.
-        total_mass_kg : float
-            Accepted for API compatibility; not used by the log-normal
-            sampler.
-        collision_energy_j : float, optional
-            Accepted for API compatibility; not used by the log-normal
-            sampler.
         """
         # Use log-normal distribution for stochastic fragment count
         n_fragments = int(rng.lognormal(self.k_debris_mu, self.k_debris_sigma))
@@ -231,7 +222,15 @@ class CollisionModel:
         This is the per-satellite annual collision probability.
         """
         rate = self.collision_rate(n_debris, n_satellites)
-        return min(rate / n_satellites, 1.0) if n_satellites > 0 else 0.0
+        p = rate / n_satellites if n_satellites > 0 else 0.0
+        if p > 1.0:
+            warnings.warn(
+                f"Hit probability {p:.4f} exceeds 1.0; clipping to 1.0. "
+                f"The dilute-gas assumption may be invalid at this debris density.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        return min(p, 1.0)
 
     @property
     def saturation_population(self) -> float:
