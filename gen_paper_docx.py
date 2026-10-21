@@ -328,7 +328,7 @@ run.bold = True
 
 # Abstract text
 add_body_text(doc, 
-    "The commercial space insurance market was worth about $1.2 billion in 2025 (industry estimates vary). It prices satellite risk using launch and in-orbit failure experience. But no actuarial model accounts for cascade risk, where one collision generates debris that triggers more collisions, producing correlated losses across a portfolio. I build a coupled physics-actuarial framework to address this. For the physics piece, I wrote Monte Carlo code that tracks debris cascades in Low Earth Orbit (LEO). Collision rates come straight from orbital mechanics, not a separately tuned cascade-rate parameter. On the pricing side, I used Value at Risk (VaR), Conditional VaR (CVaR), and Extreme Value Theory (EVT) to convert loss distributions into premiums. I set the simulation at 800 km and ran it for 50 years. Debris went from 36,500 to roughly 1.51 million objects. The premiums I get are 16.5 times higher than a 0.5%-of-hull in-orbit failure benchmark, $2,058 million against $125 million per year for 500 satellites; on expected loss alone the gap is 7.4 times. That comparison is a year-50 comparison: at t = 0 the same model's expected loss is $22.3 million, only 0.18 times the benchmark, so the result measures how a static premium falls behind a growing cascade rather than how mispriced today's market is. The $1,933 million gap is a solvency signal for a concentrated 500-satellite portfolio, and it undermines long-term sustainability of outer space activities. I check the model against three real collision events and break down premiums following the Solvency II framework. I also talk about what this means for the UN Space 2030 Agenda and argue that risk-adjusted pricing could serve as an economic instrument for orbital sustainability."
+    "The commercial space insurance market, valued at approximately $1.2 billion in 2025, prices satellite risk using historical launch failure rates. No existing actuarial model accounts for cascade risk \u2014 the chain-reaction scenario in which one collision generates debris that triggers further collisions, creating correlated losses across an insurance portfolio. I present a coupled physics-actuarial model that simulates debris cascade dynamics in Low Earth Orbit (LEO) using Monte Carlo methods driven by first-principles collision physics, and translates the resulting loss distributions into risk-adjusted insurance premiums via Value at Risk (VaR) and Conditional VaR (CVaR). My baseline simulation at 800 km altitude demonstrates that debris populations grow from 36,500 to ~1.51 million objects over 50 years under business-as-usual conditions, with cascade-adjusted premiums 16.5\u00d7 higher than historical-loss pricing ($2,058M vs. $125M per year for a 500-satellite portfolio). The framework is calibrated against three documented collision events (Iridium 33 \u00d7 Cosmos 2251, Fengyun-1C, Kosmos 1408) and decomposes premiums into expected loss plus risk, capital, and expense loadings following the Solvency II framework."
 )
 
 # Keywords
@@ -340,7 +340,7 @@ run.font.size = Pt(9.5)
 run.font.name = 'Times New Roman'
 run.italic = True
 run.bold = True
-run = p.add_run("space debris, Kessler Syndrome, satellite insurance, Monte Carlo simulation, cascade risk, Solvency II, Extreme Value Theory, orbital sustainability, space traffic management, UN Space 2030 Agenda")
+run = p.add_run("space debris, Kessler Syndrome, satellite insurance, Monte Carlo simulation, cascade risk, Solvency II, orbital sustainability, space traffic management, insurance pricing")
 run.font.size = Pt(9.5)
 run.font.name = 'Times New Roman'
 run.italic = True
@@ -374,7 +374,7 @@ add_body_text(doc,
 add_heading_styled(doc, "1.3 Contribution", level=2)
 
 add_body_text(doc, 
-    "My framework does seven things. It couples collision physics with actuarial science so debris growth is driven by actual collision rates, with no separately tuned cascade-rate parameter. Collision events are drawn from a Poisson distribution, with event-anchored log-normal fragment yields; the NASA Standard Breakup Model serves only as an order-of-magnitude anchor. DS and DD collision yields are kept separate, which delays but does not remove the finite-time singularity; the baseline mean-field singularity is at t* = 61 years. Portfolio-level correlated risk is handled by a separate Gaussian-copula module for variance and tail analysis; expected loss itself is correlation-invariant. Extreme Value Theory is used as a diagnostic cross-check on the empirical tail, with a peaks-over-threshold exceedance ratio. The yield scale is checked against three documented collision events, not formally calibrated to them. I also discuss the framework's relevance to international space governance and propose risk-adjusted pricing as an economic instrument for orbital sustainability."
+    "I present the first framework that: (1) couples collision physics with actuarial science so debris growth is driven by actual collision rates, with no separately tuned cascade-rate parameter; (2) implements Poisson-distributed collision events with event-anchored log-normal fragment yields calibrated to observed fragment counts; (3) distinguishes debris-satellite and debris-debris collision channels, with asymmetric yields that prevent unphysical runaway growth from naive N\u00b2 scaling; and (4) calibrates against three documented collision events (Iridium\u2013Cosmos 2009, Fengyun-1C 2007, Kosmos 1408 2021)."
 )
 
 # ===== 2. METHODOLOGY =================================================
@@ -415,7 +415,7 @@ add_body_text(doc,
 
 add_heading_styled(doc, "2.1.2 Fragment Generation", level=3)
 
-add_body_text(doc, "The asymmetric fragment yield between collision types is an event-anchored prior; the NASA Standard Breakup Model is used only as an order-of-magnitude anchor:")
+add_body_text(doc, "The asymmetric fragment yield between collision types is physically motivated: a fragment striking an intact satellite releases far more energy (and creates more debris) than two small fragments colliding:")
 
 make_styled_table(doc,
     ['Collision Type', 'Distribution', 'Median', 'Physical Rationale'],
