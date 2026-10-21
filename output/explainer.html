@@ -77,11 +77,12 @@
   .formula-box { text-align: center; padding: 1.2rem; margin: 1.5rem 0; font-family: var(--font-serif); font-size: 1.2rem; color: var(--text); font-style: italic; border: 1px solid var(--border); border-radius: 6px; }
 
   /* TABLE */
-  .data-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
-  .data-table thead th { background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.7rem 1rem; text-align: left; }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 1rem 0; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 400px; }
+  .data-table thead th { background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.7rem 1rem; text-align: left; white-space: nowrap; }
   .data-table thead th:first-child { border-radius: 4px 0 0 0; }
   .data-table thead th:last-child { border-radius: 0 4px 0 0; }
-  .data-table tbody td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+  .data-table tbody td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); white-space: nowrap; }
   .data-table .num { font-variant-numeric: tabular-nums; text-align: right; }
 
   /* COMPARE */
@@ -289,6 +290,7 @@
       <div class="formula-box">
         R = N<sub>d</sub> &middot; N<sub>s</sub> &middot; &sigma; &middot; v &middot; T / V
       </div>
+      <div class="table-wrap">
       <table class="data-table">
         <thead><tr><th>Parameter</th><th>Description</th><th class="num">Baseline</th></tr></thead>
         <tbody>
@@ -300,6 +302,7 @@
           <tr><td>V</td><td>Shell volume</td><td class="num">1.29 &times; 10&#8311; km&sup3;</td></tr>
         </tbody>
       </table>
+      </div>
       <p style="margin:0;">
         At current population levels, this yields <strong>~7 debris&ndash;satellite</strong> and
         <strong>~16 debris&ndash;debris</strong> collisions per year.
@@ -370,7 +373,7 @@
         <div class="tl-detail">
           The first accidental hypervelocity collision between two intact satellites.
           An active Iridium communications satellite (560 kg) struck a defunct Russian
-          military satellite (950 kg) at 11.7 km/s over northern Siberia, generating
+          military satellite (950 kg) at 11.6 km/s over northern Siberia, generating
           <strong>~2,300 fragments</strong> (&gt;10 cm) and a combined 1,510 kg of debris.
         </div>
       </div>
@@ -380,7 +383,7 @@
         <div class="tl-detail">
           Russia conducted a direct-ascent ASAT test against its own defunct
           reconnaissance satellite, creating <strong>~1,500 fragments</strong> (&gt;10 cm)
-          from 2,200 kg of mass at 485 km. The ISS crew took shelter twice as debris
+          from 2,200 kg of mass at 480 km. The ISS crew took shelter twice as debris
           passed within close proximity.
         </div>
       </div>
@@ -388,6 +391,7 @@
 
     <div class="card">
       <h3>Calibration Results</h3>
+      <div class="table-wrap">
       <table class="data-table">
         <thead><tr><th>Event</th><th>Date</th><th class="num">Fragments (&gt;10cm)</th><th class="num">Mass (kg)</th></tr></thead>
         <tbody>
@@ -396,6 +400,7 @@
           <tr><td>Kosmos 1408 (ASAT)</td><td>2021-11-15</td><td class="num">~1,500</td><td class="num">2,200</td></tr>
         </tbody>
       </table>
+      </div>
       <p>
         These events anchor the fragment yield distributions: debris&ndash;satellite collisions
         produce a median of ~245 fragments (log-normal, &mu;=5.5, &sigma;=0.8), while
@@ -453,6 +458,7 @@
     <div class="card">
       <h3>Premium Decomposition (Solvency-II-style)</h3>
       <p>This stylised pricing model splits the premium into four parts &mdash; it is not the calculation prescribed by the Solvency II Directive:</p>
+      <div class="table-wrap">
       <table class="data-table">
         <thead><tr><th>Component</th><th>Description</th><th class="num">Amount</th></tr></thead>
         <tbody>
@@ -463,6 +469,7 @@
           <tr style="font-weight:700;"><td style="color:var(--accent);">Total Premium</td><td></td><td class="num" style="color:var(--accent); font-size:1.05rem;">$2,058M / yr</td></tr>
         </tbody>
       </table>
+      </div>
       <p>
         The risk loading ($966M) is the biggest piece &mdash; bigger than the expected
         loss itself. That's because the tail is heavy: in the worst 5% of scenarios,
@@ -472,6 +479,7 @@
 
     <div class="card">
       <h3>Risk Metrics</h3>
+      <div class="table-wrap">
       <table class="data-table">
         <thead><tr><th>Metric</th><th>Definition</th><th class="num">Value</th></tr></thead>
         <tbody>
@@ -481,6 +489,7 @@
           <tr><td>CVaR&#8329;&#8329; (ES)</td><td>Expected shortfall beyond VaR&#8329;&#8329;</td><td class="num">$1,854M</td></tr>
         </tbody>
       </table>
+      </div>
       <p>
         With 1,000 Monte Carlo paths, the 95th percentile is estimated from roughly the
         top 50 samples (standard error ~3&ndash;5%), and the 99th percentile from roughly
