@@ -122,16 +122,14 @@
   .tl-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin: 0.1rem 0; }
   .tl-detail { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
 
-  /* COLLAPSIBLE DEMO */
-  .demo-collapse { max-width: var(--max-width); margin: var(--spacing) auto; padding: 0 var(--spacing); }
-  .demo-collapse summary { cursor: pointer; font-weight: 600; color: var(--accent); padding: 1rem 0; border-bottom: 1px solid var(--border); list-style: none; font-size: 0.95rem; }
-  .demo-collapse summary::-webkit-details-marker { display: none; }
-  .demo-collapse[open] summary { margin-bottom: 1rem; }
-  .demo-inner canvas { border-radius: 6px; background: #0f1a30; width: 100%; max-width: 100%; }
-  .demo-controls { display: flex; gap: 0.6rem; justify-content: center; margin-top: 1rem; }
+  /* DEMO SECTION */
+  .demo-section { max-width: var(--max-width); margin: var(--spacing) auto; padding: 0 var(--spacing); }
+  .demo-label { font-weight: 600; color: var(--accent); padding: 1rem 0 0.8rem; font-size: 0.95rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+  .demo-inner canvas { border-radius: 6px; background: #0f1a30; width: 100%; height: auto; max-width: 100%; display: block; }
+  .demo-controls { display: flex; gap: 0.6rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
   .btn { background: var(--accent); color: #fff; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: var(--font-sans); }
   .btn.alt { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
-  .demo-readout { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.8rem; font-size: 0.8rem; color: var(--text-secondary); }
+  .demo-readout { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.8rem; font-size: 0.8rem; color: var(--text-secondary); flex-wrap: wrap; }
   .demo-readout strong { color: var(--text); font-variant-numeric: tabular-nums; }
 
   /* FOOTER */
@@ -150,9 +148,24 @@
     .hero h1 { font-size: 1.3rem; }
     .stats-row { grid-template-columns: 1fr 1fr; }
     .compare { grid-template-columns: 1fr; }
+    .demo-inner canvas { border-radius: 4px; }
+    .demo-readout { gap: 1rem; font-size: 0.75rem; }
+    .nav-links { gap: 1.2rem; }
+    .nav-links a { font-size: 0.85rem; }
+    .section-header h2 { font-size: 1.1rem; }
+    .footer p { font-size: 0.8rem; }
   }
   @media (max-width: 480px) {
     .stats-row { grid-template-columns: 1fr; }
+    .demo-controls { gap: 0.4rem; }
+    .demo-controls .btn { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
+    .demo-readout { flex-direction: column; align-items: center; gap: 0.4rem; }
+    .hero { margin: 2rem auto 1rem; }
+    .hero h1 { font-size: 1.15rem; }
+    .section { padding: 1.5rem 0; }
+    .summary-col { padding-left: 0.8rem; }
+    .nav-bar { padding: 0.8rem 1rem; }
+    .footer { padding: 1.5rem 1rem 0; }
   }
 </style>
 </head>
@@ -306,9 +319,9 @@
     </div>
   </section>
 
-  <!-- COLLAPSIBLE SIMULATION DEMO -->
-  <details class="demo-collapse">
-    <summary>Open interactive demo</summary>
+  <!-- INTERACTIVE SIMULATION DEMO (always visible) -->
+  <div class="demo-section">
+    <div class="demo-label">Interactive Simulation</div>
     <div class="demo-inner">
       <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">
         Watch debris grow over 50 simulated years. The left panel shows the orbital
@@ -326,7 +339,7 @@
         <div>Year: <strong id="sYear">0.0</strong></div>
       </div>
     </div>
-  </details>
+  </div>
 
   <!-- 03 CALIBRATION -->
   <section id="calibration" class="section">
